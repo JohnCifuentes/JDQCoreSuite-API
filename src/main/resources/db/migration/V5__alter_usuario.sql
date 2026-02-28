@@ -1,0 +1,3 @@
+ALTER TABLE seguridad.usuario
+ADD COLUMN password VARCHAR(255) NOT NULL,
+ADD COLUMN primer_acceso BOOLEAN NOT NULL DEFAULT TRUE;
