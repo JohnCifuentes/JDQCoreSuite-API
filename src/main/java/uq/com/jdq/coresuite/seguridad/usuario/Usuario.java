@@ -18,7 +18,7 @@ public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usuario_seq_generator")
-    @SequenceGenerator(name = "usuario_seq_generator", sequenceName = "sistema.usuario_seq", allocationSize = 1)
+    @SequenceGenerator(name = "usuario_seq_generator", sequenceName = "seguridad.usuario_seq", allocationSize = 1)
     public Long id;
 
     @ManyToOne

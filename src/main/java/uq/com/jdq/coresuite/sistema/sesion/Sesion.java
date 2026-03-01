@@ -30,7 +30,7 @@ public class Sesion {
     private Usuario usuario;
 
     @Column(name = "fecha_inicio")
-    private LocalDateTime fechaInicio;
+    private LocalDateTime fechaInicio = LocalDateTime.now();
 
     @Column(name = "fecha_ultimo_acceso")
     private LocalDateTime fechaUltimoAcceso;

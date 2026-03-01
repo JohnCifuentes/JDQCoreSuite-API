@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacion;
 import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacionRepository;
+import uq.com.jdq.coresuite.config.SecurityConfig;
 import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 import uq.com.jdq.coresuite.sistema.empresa.EmpresaRepository;
 
@@ -35,7 +36,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         );
         usuario.setEmpresa(empresa);
         usuario.setTipoIdentificacion(tipoIdentificacion);
-        if(this.getUsuarioByCorreoElectronico(createUsuarioDTO.correoElectronico()).isEmpty()){
+        if(!this.getUsuarioByCorreoElectronico(createUsuarioDTO.correoElectronico()).isEmpty()){
             throw new RuntimeException("El correo electronico ya existe");
         }
         usuario = usuarioRepository.save(usuario);
@@ -81,9 +82,9 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional(readOnly = true)
     public ResponseUsuarioDTO getUsuarioById(Long id) {
-        return usuarioRepository.findById(id)
-                .map(usuarioMapper::toDTO)
-                .orElse(null);
+        Optional<Usuario> usuariobd = usuarioRepository.findById(id);
+        ResponseUsuarioDTO responseUsuarioDTO = usuarioMapper.toDTO(usuariobd.get());
+        return responseUsuarioDTO;
     }
 
     @Override
@@ -95,12 +96,15 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public ResponseUsuarioDTO getUsuarioByCorreoElectronicoAndPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception {
-        Optional<Usuario> usuario = usuarioRepository.findByCorreoElectronicoAndPassword(usuarioCredencialesDTO.correoElectronico(), passwordEncoder.encode(usuarioCredencialesDTO.password()));
+    public Usuario getUsuarioByCorreoElectronicoAndPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception {
+        Optional<Usuario> usuario = this.getUsuarioByCorreoElectronico(usuarioCredencialesDTO.correoElectronico());
         if(usuario.isEmpty()){
+            throw new RuntimeException("No existe el correo electronico");
+        }
+        if(!passwordEncoder.matches(usuarioCredencialesDTO.password(), usuario.get().getPassword())){
             throw new RuntimeException("Credenciales incorrectas");
         }
-        return usuarioMapper.toDTO(usuario.get());
+        return usuario.get();
     }
 
     @Override

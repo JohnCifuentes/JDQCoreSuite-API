@@ -6,5 +6,4 @@ public interface CodigoService {
 
     boolean confirmarCodigo(ConfirmarUsuarioCodigoDTO codigoDTO) throws Exception;
 
-
 }

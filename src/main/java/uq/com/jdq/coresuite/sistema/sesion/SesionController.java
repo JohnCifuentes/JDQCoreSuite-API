@@ -1,6 +1,7 @@
 package uq.com.jdq.coresuite.sistema.sesion;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,8 +10,9 @@ import uq.com.jdq.coresuite.config.RespuestaDTO;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/sistema/sesion")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
+@RequestMapping("/api/sistema/sesion")
 public class SesionController {
 
     private final SesionService sesionService;
@@ -25,12 +27,6 @@ public class SesionController {
     @Operation(summary = "Update an existing sesion", description = "Updates the sesion with the specified ID using the provided data")
     public ResponseEntity<RespuestaDTO<ResponseSesionDTO>> updateSesion(@PathVariable Long id, @RequestBody UpdateSesionDTO updateSesionDTO) throws Exception {
         return ResponseEntity.ok(new RespuestaDTO<>(false, this.sesionService.updateSesion(id, updateSesionDTO)));
-    }
-
-    @PutMapping("/{id}/inactive")
-    @Operation(summary = "Inactive a sesion", description = "Inactive the sesion with the specified ID")
-    public ResponseEntity<RespuestaDTO<ResponseSesionDTO>> inactiveSesion(@PathVariable Long id, @RequestBody InactiveSesionDTO inactiveSesionDTO) throws Exception {
-        return ResponseEntity.ok(new RespuestaDTO<>(false, this.sesionService.inactiveSesion(id, inactiveSesionDTO)));
     }
 
     @GetMapping

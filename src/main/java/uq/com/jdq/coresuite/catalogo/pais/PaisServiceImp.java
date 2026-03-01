@@ -21,9 +21,14 @@ public class PaisServiceImp implements PaisService {
     }
 
     @Override
-    public PaisDTO getPaisById(Long id) throws Exception {
+    public PaisDTO getPaisById(Long id) throws Exception{
         Pais pais = paisRepository.findById(id)
-                .orElseThrow(() -> new Exception("No se encontro el genero"));
+                .orElseThrow(() -> new Exception("Pais no encontrado"));
         return paisMapper.toDto(pais);
     }
+
+    public Pais getPais(Long id) throws Exception{
+        return paisMapper.toEntity(this.getPaisById(id));
+    }
+
 }

@@ -1,6 +1,7 @@
 package uq.com.jdq.coresuite.sistema.plan;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +11,9 @@ import uq.com.jdq.coresuite.config.RespuestaDTO;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/sistema/plan")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
+@RequestMapping("/api/sistema/plan")
 public class PlanController {
 
     private final PlanService planService;

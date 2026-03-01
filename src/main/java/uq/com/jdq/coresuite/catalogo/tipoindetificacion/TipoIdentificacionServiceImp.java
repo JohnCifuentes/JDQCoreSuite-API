@@ -1,7 +1,6 @@
 package uq.com.jdq.coresuite.catalogo.tipoindetificacion;
 
 import lombok.RequiredArgsConstructor;
-import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,4 +22,13 @@ public class TipoIdentificacionServiceImp implements TipoIdentificacionService {
         TipoIdentificacion tipoIdentificacion = tipoIdentificacionRepository.findById(id).orElseThrow(() -> new Exception("Tipo de Identificacion no encontrado"));
         return tipoIdentificacionMapper.toDto(tipoIdentificacion);
     }
+
+    public TipoIdentificacion getTipoIdentificacion(Long id) throws Exception {
+        TipoIdentificacionDTO tipoIdentificacionDTO = getTipoIdentificacionById(id);
+        System.out.println("Tipo de Identificacion: " + tipoIdentificacionDTO);
+        return tipoIdentificacionMapper.toEntity(
+                this.getTipoIdentificacionById(id)
+        );
+    }
+
 }

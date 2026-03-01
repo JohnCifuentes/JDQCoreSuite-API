@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import uq.com.jdq.coresuite.catalogo.departamento.Departamento;
 import uq.com.jdq.coresuite.catalogo.departamento.DepartamentoRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +33,12 @@ public class MunicipioServiceImp implements MunicipioService {
     @Override
     public MunicipioDTO getMunicipioById(Long id) throws Exception {
         Municipio municipio = municipioRepository.findById(id)
-                .orElseThrow(() -> new Exception("No se encontro el genero"));
+                .orElseThrow(() -> new Exception("No se encontro el departamento"));
         return municipioMapper.toDto(municipio);
     }
+
+    public Municipio getMunicipio(Long id) throws Exception {
+        return municipioMapper.toEntity(this.getMunicipioById(id));
+    }
+
 }

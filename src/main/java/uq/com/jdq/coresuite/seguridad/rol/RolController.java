@@ -1,6 +1,7 @@
 package uq.com.jdq.coresuite.seguridad.rol;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,8 +11,9 @@ import uq.com.jdq.coresuite.sistema.empresa.ResponseEmpresaDTO;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/seguridad/rol")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
+@RequestMapping("/api/seguridad/rol")
 public class RolController {
 
     private final RolService rolService;

@@ -1,6 +1,7 @@
 package uq.com.jdq.coresuite.seguridad.rolusuario;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,8 +11,9 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/seguridad/rol-usuario")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
+@RequestMapping("/api/seguridad/rol-usuario")
 public class RolUsuarioController {
 
     private final RolUsuarioService rolUsuarioService;

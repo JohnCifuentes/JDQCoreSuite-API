@@ -1,6 +1,7 @@
 package uq.com.jdq.coresuite.sistema.licencia;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,8 +10,9 @@ import uq.com.jdq.coresuite.config.RespuestaDTO;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/sistema/licencia")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
+@RequestMapping("/api/sistema/licencia")
 public class LicenciaController {
 
     private final LicenciaService licenciaService;

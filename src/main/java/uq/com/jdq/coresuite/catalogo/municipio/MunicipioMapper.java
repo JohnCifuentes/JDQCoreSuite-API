@@ -5,6 +5,8 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface MunicipioMapper {
 
+    Municipio toEntity(MunicipioDTO municipioDTO);
+
     MunicipioDTO toDto(Municipio municipio);
 
 }

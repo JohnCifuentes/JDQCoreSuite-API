@@ -3,8 +3,10 @@ package uq.com.jdq.coresuite.catalogo.departamento;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import uq.com.jdq.coresuite.catalogo.pais.Pais;
 
+@Setter
 @Getter
 @NoArgsConstructor
 @Entity

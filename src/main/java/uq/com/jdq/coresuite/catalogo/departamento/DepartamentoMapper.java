@@ -5,9 +5,7 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface DepartamentoMapper {
 
-    /**
-     * OBTENER
-     */
+    Departamento toEntity(DepartamentoDTO departamentoDTO);
 
     DepartamentoDTO toDTO(Departamento departamento);
 

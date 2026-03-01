@@ -1,5 +1,6 @@
 package uq.com.jdq.coresuite.catalogo.pais;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +13,8 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/catalogo/paises")
+@SecurityRequirement(name = "bearerAuth")
+@RequestMapping("/api/catalogo/paises")
 public class PaisController {
     private final PaisService paisService;
 
@@ -23,7 +25,7 @@ public class PaisController {
 
     @GetMapping("/{id}")
     public ResponseEntity<RespuestaDTO<PaisDTO>> getPaisById(@PathVariable Long id) throws Exception {
-        return ResponseEntity.ok(new RespuestaDTO<>(true, this.paisService.getPaisById(id)));
+        return ResponseEntity.ok(new RespuestaDTO<>(false, this.paisService.getPaisById(id)));
     }
 
 }

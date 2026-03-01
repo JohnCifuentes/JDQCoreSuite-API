@@ -10,8 +10,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     List<ResponseUsuarioDTO> findByEmpresa(Empresa empresa);
 
-    Optional<Usuario> findByCorreoElectronicoAndPassword(String correoElectronico, String password) throws Exception;
-
     Optional<Usuario> findByCorreoElectronico(String correoElectronico) throws Exception;
 
 }

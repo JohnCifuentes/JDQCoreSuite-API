@@ -3,6 +3,8 @@ package uq.com.jdq.coresuite.sistema.sesion;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uq.com.jdq.coresuite.seguridad.usuario.Usuario;
+import uq.com.jdq.coresuite.seguridad.usuario.UsuarioRepository;
 import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 import uq.com.jdq.coresuite.sistema.empresa.EmpresaRepository;
 
@@ -16,11 +18,21 @@ public class SesionServiceImpl implements SesionService {
     private final SesionRepository sesionRepository;
     private final SesionMapper sesionMapper;
     private final EmpresaRepository empresaRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Override
     @Transactional
     public ResponseSesionDTO createSesion(CreateSesionDTO createSesionDTO) {
         Sesion sesion = sesionMapper.toEntity(createSesionDTO);
+        Long empresaId = createSesionDTO.empresaId();
+        Empresa empresa = empresaRepository.findById(empresaId)
+                .orElseThrow(() -> new RuntimeException("Empresa no encontrada"));
+        Long usuarioId = createSesionDTO.usuarioId();
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("No existe el usuario")
+        );
+        sesion.setEmpresa(empresa);
+        sesion.setUsuario(usuario);
         sesion = sesionRepository.save(sesion);
         return sesionMapper.toDTO(sesion);
     }
@@ -31,16 +43,6 @@ public class SesionServiceImpl implements SesionService {
         Sesion sesion = sesionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sesion not found"));
         sesionMapper.updateEntityFromDTO(updateSesionDTO, sesion);
-        sesion = sesionRepository.save(sesion);
-        return sesionMapper.toDTO(sesion);
-    }
-
-    @Override
-    @Transactional
-    public ResponseSesionDTO inactiveSesion(Long id, InactiveSesionDTO inactiveSesionDTO) {
-        Sesion sesion = sesionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sesion not found"));
-        sesionMapper.inactiveEntityFromDTO(inactiveSesionDTO, sesion);
         sesion = sesionRepository.save(sesion);
         return sesionMapper.toDTO(sesion);
     }

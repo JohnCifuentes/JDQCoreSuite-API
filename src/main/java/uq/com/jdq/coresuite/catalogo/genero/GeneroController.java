@@ -1,5 +1,6 @@
 package uq.com.jdq.coresuite.catalogo.genero;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +13,8 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/catalogo/generos")
+@SecurityRequirement(name = "bearerAuth")
+@RequestMapping("/api/catalogo/generos")
 public class GeneroController {
     private final GeneroService generoService;
 

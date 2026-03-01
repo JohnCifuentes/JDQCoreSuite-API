@@ -16,7 +16,7 @@ public interface UsuarioService {
 
     List<ResponseUsuarioDTO> getUsuariosByEmpresa(Long empresaId) throws Exception;
 
-    ResponseUsuarioDTO getUsuarioByCorreoElectronicoAndPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception;
+    Usuario getUsuarioByCorreoElectronicoAndPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception;
 
     ResponseUsuarioDTO asignarPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception;
 

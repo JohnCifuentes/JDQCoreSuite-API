@@ -8,8 +8,6 @@ public interface SesionService {
 
     ResponseSesionDTO updateSesion(Long id, UpdateSesionDTO updateSesionDTO);
 
-    ResponseSesionDTO inactiveSesion(Long id, InactiveSesionDTO inactiveSesionDTO);
-
     List<ResponseSesionDTO> getAllSesiones();
 
     ResponseSesionDTO getSesionById(Long id);
