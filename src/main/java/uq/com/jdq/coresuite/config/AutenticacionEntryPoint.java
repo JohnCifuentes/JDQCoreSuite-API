@@ -15,7 +15,9 @@ public class AutenticacionEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
 
-        RespuestaDTO<String> dto = new RespuestaDTO<>(true, "No tienes permisos para acceder a este recurso");
+        String mensaje = authException.getMessage();
+
+        RespuestaDTO<String> dto = new RespuestaDTO<>(true, mensaje);
 
         response.setContentType("application/json");
         response.setStatus(403);

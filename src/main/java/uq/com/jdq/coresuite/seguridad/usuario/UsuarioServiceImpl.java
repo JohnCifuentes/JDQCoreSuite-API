@@ -1,6 +1,8 @@
 package uq.com.jdq.coresuite.seguridad.usuario;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,10 +101,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     public Usuario getUsuarioByCorreoElectronicoAndPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception {
         Optional<Usuario> usuario = this.getUsuarioByCorreoElectronico(usuarioCredencialesDTO.correoElectronico());
         if(usuario.isEmpty()){
-            throw new RuntimeException("No existe el correo electronico");
+            throw new UsernameNotFoundException("No existe el correo electronico");
         }
         if(!passwordEncoder.matches(usuarioCredencialesDTO.password(), usuario.get().getPassword())){
-            throw new RuntimeException("Credenciales incorrectas");
+            throw new BadCredentialsException("Credenciales incorrectas");
         }
         return usuario.get();
     }

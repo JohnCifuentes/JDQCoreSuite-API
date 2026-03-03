@@ -43,6 +43,7 @@ public class SecurityConfig {
                 // SOLO POST público para empresa
                 .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/sistema/empresa").permitAll()
+                .requestMatchers("/api/catalogo/**").permitAll()
                 // Rutas públicas específicas de usuario
                 .requestMatchers(
                     "/api/seguridad/usuario/correo/password",

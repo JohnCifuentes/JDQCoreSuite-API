@@ -1,6 +1,5 @@
 package uq.com.jdq.coresuite.catalogo.departamento;
 
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/catalogo/departamentos")
 public class DepartamentoController {
     private final DepartamentoService departamentoService;
@@ -24,7 +22,7 @@ public class DepartamentoController {
     }
 
     @GetMapping("/{paisId}/pais")
-    public ResponseEntity<RespuestaDTO<List<DepartamentoDTO>>> getAllDepartamentosByPais(Long paisId) throws Exception {
+    public ResponseEntity<RespuestaDTO<List<DepartamentoDTO>>> getAllDepartamentosByPais(@PathVariable Long paisId) throws Exception {
         return ResponseEntity.ok(new RespuestaDTO<>(false, this.departamentoService.getAllDepartamentosByPais(paisId)));
     }
 

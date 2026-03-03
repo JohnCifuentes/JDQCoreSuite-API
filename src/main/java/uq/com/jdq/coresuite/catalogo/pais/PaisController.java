@@ -1,6 +1,5 @@
 package uq.com.jdq.coresuite.catalogo.pais;
 
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/catalogo/paises")
 public class PaisController {
     private final PaisService paisService;
