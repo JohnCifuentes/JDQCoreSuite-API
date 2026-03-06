@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface AuthenticationEventsService {
 
-    void createAuthenticationEvent(AuthenticationEventsDTO authenticationEventsDTO) throws Exception;
+    AuthenticationEventsDTO createAuthenticationEvent(AuthenticationEventsDTO authenticationEventsDTO) throws Exception;
 
     List<AuthenticationEventsDTO> getAll();
 

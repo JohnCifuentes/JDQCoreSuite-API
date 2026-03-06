@@ -78,4 +78,9 @@ public class UsuarioController {
         return ResponseEntity.ok(new RespuestaDTO<>(false, this.usuarioService.actualizarPassword(usuarioCredencialesDTO)));
     };
 
+    @PutMapping("/{correoElectronico}/bloquear/usuario")
+    public ResponseEntity<RespuestaDTO<ResponseUsuarioDTO>> bloquearUsuario(@RequestParam String correoElectronico) throws Exception {
+        return ResponseEntity.ok(new RespuestaDTO<>(false, this.usuarioService.blockUsuario(correoElectronico)));
+    }
+
 }

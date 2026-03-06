@@ -2,13 +2,15 @@ package uq.com.jdq.coresuite.seguridad.usuario;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacion;
 import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacionRepository;
 import uq.com.jdq.coresuite.config.exceptions.NoExisteException;
+import uq.com.jdq.coresuite.infra.autenticationevents.AuthenticationEventsDTO;
+import uq.com.jdq.coresuite.infra.autenticationevents.AuthenticationEventsService;
+import uq.com.jdq.coresuite.infra.authenticationeventstype.AuthenticationEventsTypeService;
 import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 import uq.com.jdq.coresuite.sistema.empresa.EmpresaRepository;
 
@@ -25,6 +27,8 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final EmpresaRepository empresaRepository;
     private final TipoIdentificacionRepository tipoIdentificacionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationEventsService authenticationEventsService;
+    private final AuthenticationEventsTypeService authenticationEventsTypeService;
 
     @Override
     @Transactional
@@ -101,9 +105,21 @@ public class UsuarioServiceImpl implements UsuarioService {
     public Usuario getUsuarioByCorreoElectronicoAndPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception {
         Optional<Usuario> usuario = this.getUsuarioByCorreoElectronico(usuarioCredencialesDTO.correoElectronico());
         if(usuario.isEmpty()){
+            AuthenticationEventsDTO authenticationEventsDTO = new AuthenticationEventsDTO(
+                usuarioCredencialesDTO.correoElectronico(),
+                authenticationEventsTypeService.getAuthenticationEventsTypeById(2),
+                "UsuarioServiceImpl.getUsuarioByCorreoElectronicoAndPassword"
+            );
+            authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
             throw new NoExisteException("No existe el correo electronico");
         }
         if(!passwordEncoder.matches(usuarioCredencialesDTO.password(), usuario.get().getPassword())){
+            AuthenticationEventsDTO authenticationEventsDTO = new AuthenticationEventsDTO(
+                    usuarioCredencialesDTO.correoElectronico(),
+                    authenticationEventsTypeService.getAuthenticationEventsTypeById(3),
+                    "UsuarioServiceImpl.getUsuarioByCorreoElectronicoAndPassword"
+            );
+            authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
             throw new BadCredentialsException("Credenciales incorrectas");
         }
         return usuario.get();
@@ -131,7 +147,27 @@ public class UsuarioServiceImpl implements UsuarioService {
             usuarioRepository.save(usuarioAux);
             return usuarioMapper.toDTO(usuarioAux);
         } else {
-            throw new RuntimeException("No existe el usuario");
+            throw new NoExisteException("No existe el usuario");
+        }
+    }
+
+    @Override
+    public ResponseUsuarioDTO blockUsuario(String correoElectronico) throws Exception {
+        Optional<Usuario> usuario = this.getUsuarioByCorreoElectronico(correoElectronico);
+        if(usuario.isPresent()){
+            Usuario usuarioAux = usuario.get();
+            usuarioAux.setEstado("B");
+            usuarioRepository.save(usuarioAux);
+            AuthenticationEventsDTO authenticationEventsDTO = new AuthenticationEventsDTO(
+                    usuarioAux.getCorreoElectronico(),
+                    authenticationEventsTypeService.getAuthenticationEventsTypeById(5),
+                    "LoginServiceImp.login"
+            );
+            authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
+
+            return usuarioMapper.toDTO(usuarioAux);
+        } else {
+            throw new NoExisteException("No existe el usuario");
         }
     }
 

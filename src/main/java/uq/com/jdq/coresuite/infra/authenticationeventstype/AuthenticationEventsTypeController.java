@@ -22,7 +22,7 @@ public class AuthenticationEventsTypeController {
     };
 
     @GetMapping("/{id}/enventType")
-    public ResponseEntity<RespuestaDTO<AuthenticationEventsTypeDTO>> getAuthenticationEventsTypeById(@PathVariable Integer id) throws Exception{
+    public ResponseEntity<RespuestaDTO<AuthenticationEventsType>> getAuthenticationEventsTypeById(@PathVariable Integer id) throws Exception{
         return ResponseEntity.ok(new RespuestaDTO<>(false, this.authenticationEventsTypeService.getAuthenticationEventsTypeById(id)));
     };
 

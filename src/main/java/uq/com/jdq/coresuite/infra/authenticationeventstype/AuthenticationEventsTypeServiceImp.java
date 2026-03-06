@@ -20,12 +20,13 @@ public class AuthenticationEventsTypeServiceImp implements AuthenticationEventsT
     }
 
     @Override
-    public AuthenticationEventsTypeDTO getAuthenticationEventsTypeById(Integer id) throws Exception {
-        Optional<AuthenticationEventsType> authenticationEventsType = authenticationEventsTypeRepository.findById(Long.valueOf(id));
+    public AuthenticationEventsType getAuthenticationEventsTypeById(Integer id) throws Exception {
+        Optional<AuthenticationEventsType> authenticationEventsType = authenticationEventsTypeRepository.findById(id);
         if (authenticationEventsType.isPresent()) {
-            return authenticationEventsTypeMapper.toDTO(authenticationEventsType.get());
+            return authenticationEventsType.get();
         } else {
             throw new NoExisteException("No se encontro el id de la eventa");
         }
     }
+
 }

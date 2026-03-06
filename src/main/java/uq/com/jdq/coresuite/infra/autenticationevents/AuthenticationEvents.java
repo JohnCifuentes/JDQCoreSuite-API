@@ -25,11 +25,11 @@ public class AuthenticationEvents {
     @Column(nullable = false, length = 255)
     private String email;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "event_type_id", nullable = false)
     private AuthenticationEventsType eventType;
 
-    @Column(columnDefinition = "TEXT")
+    @Column
     private String description;
 
 }

@@ -6,6 +6,6 @@ public interface AuthenticationEventsTypeService {
 
     List<AuthenticationEventsTypeDTO> getAll() throws Exception;
 
-    AuthenticationEventsTypeDTO getAuthenticationEventsTypeById(Integer id) throws Exception;
+    AuthenticationEventsType getAuthenticationEventsTypeById(Integer id) throws Exception;
 
 }

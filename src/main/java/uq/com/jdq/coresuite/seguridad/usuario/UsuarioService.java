@@ -22,4 +22,6 @@ public interface UsuarioService {
 
     ResponseUsuarioDTO actualizarPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception;
 
+    ResponseUsuarioDTO blockUsuario(String correoElectronico) throws Exception;
+
 }

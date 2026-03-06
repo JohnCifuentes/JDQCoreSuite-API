@@ -54,4 +54,6 @@ public class Licencia {
     @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActualizacion;
 
+
+
 }

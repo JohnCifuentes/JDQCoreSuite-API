@@ -48,7 +48,8 @@ public class SecurityConfig {
                 // Rutas públicas específicas de usuario
                 .requestMatchers(
                     "/api/seguridad/usuario/correo/password",
-                    "/api/seguridad/usuario/recuperar/password"
+                    "/api/seguridad/usuario/recuperar/password",
+                    "/api/seguridad/usuario/*/bloquear/usuario"
                 ).permitAll()
                 // Permitir SOLO GET en /api/moderador/** para CLIENTE y MODERADOR
                 //.requestMatchers(HttpMethod.GET, "/api/moderador/**").hasAnyAuthority("ROLE_CLIENTE", "ROLE_MODERADOR")

@@ -14,4 +14,5 @@ public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
     Optional<Object> findByTipoIdentificacionAndNumeroIdentificacionAndIdNot(TipoIdentificacion tipoIdentificacion, String s, Long id);
 
     Optional<Object> findByCorreoElectronicoAndIdNot(String correoElectronico, Long id);
+
 }
