@@ -1,6 +1,7 @@
 package uq.com.jdq.coresuite.seguridad.usuario;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UsuarioService {
 
@@ -23,5 +24,7 @@ public interface UsuarioService {
     ResponseUsuarioDTO actualizarPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception;
 
     ResponseUsuarioDTO blockUsuario(String correoElectronico) throws Exception;
+
+    Optional<Usuario> getUsuarioByCorreoElectronico(String correoElectronico) throws Exception;
 
 }

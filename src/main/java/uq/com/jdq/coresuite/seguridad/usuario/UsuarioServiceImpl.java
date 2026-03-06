@@ -171,6 +171,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
     }
 
+    @Override
     public Optional<Usuario> getUsuarioByCorreoElectronico(String correoElectronico) throws Exception {
         return usuarioRepository.findByCorreoElectronico(correoElectronico);
     }
