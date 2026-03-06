@@ -65,12 +65,6 @@ public class UsuarioController {
         return ResponseEntity.ok(new RespuestaDTO<>(false, this.usuarioService.getUsuarioByCorreoElectronicoAndPassword(usuarioCredencialesDTO)));
     };
 
-    @PutMapping("/asignar/password")
-    @Operation(summary = "", description = "")
-    public ResponseEntity<RespuestaDTO<ResponseUsuarioDTO>> asignarPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception {
-        return ResponseEntity.ok(new RespuestaDTO<>(false, this.usuarioService.asignarPassword(usuarioCredencialesDTO)));
-    }
-
     @PutMapping("/recuperar/password")
     @Operation(summary = "", description = "")
     public ResponseEntity<RespuestaDTO<ResponseUsuarioDTO>> recuperarPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception {

@@ -18,8 +18,6 @@ public interface UsuarioService {
 
     Usuario getUsuarioByCorreoElectronicoAndPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception;
 
-    ResponseUsuarioDTO asignarPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception;
-
     ResponseUsuarioDTO recuperarPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception;
 
     ResponseUsuarioDTO actualizarPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception;

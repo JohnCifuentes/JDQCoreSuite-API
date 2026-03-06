@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/sistema/empresa").permitAll()
                 .requestMatchers("/api/catalogo/**").permitAll()
+                .requestMatchers("/api/seguridad/codigo/**").permitAll()
                 // Rutas públicas específicas de usuario
                 .requestMatchers(
                     "/api/seguridad/usuario/correo/password",

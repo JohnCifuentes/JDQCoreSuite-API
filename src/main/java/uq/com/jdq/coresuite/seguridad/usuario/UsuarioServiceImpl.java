@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacion;
 import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacionRepository;
-import uq.com.jdq.coresuite.config.SecurityConfig;
+import uq.com.jdq.coresuite.config.exceptions.NoExisteException;
 import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 import uq.com.jdq.coresuite.sistema.empresa.EmpresaRepository;
 
@@ -92,7 +92,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public List<ResponseUsuarioDTO> getUsuariosByEmpresa(Long empresaId) throws Exception {
         Empresa empresa = empresaRepository.findById(empresaId).orElseThrow(() ->
-                new RuntimeException("No existe la empresa")
+                new NoExisteException("No existe la empresa")
         );
         return usuarioRepository.findByEmpresa(empresa);
     }
@@ -101,25 +101,12 @@ public class UsuarioServiceImpl implements UsuarioService {
     public Usuario getUsuarioByCorreoElectronicoAndPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception {
         Optional<Usuario> usuario = this.getUsuarioByCorreoElectronico(usuarioCredencialesDTO.correoElectronico());
         if(usuario.isEmpty()){
-            throw new UsernameNotFoundException("No existe el correo electronico");
+            throw new NoExisteException("No existe el correo electronico");
         }
         if(!passwordEncoder.matches(usuarioCredencialesDTO.password(), usuario.get().getPassword())){
             throw new BadCredentialsException("Credenciales incorrectas");
         }
         return usuario.get();
-    }
-
-    @Override
-    public ResponseUsuarioDTO asignarPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception {
-        Optional<Usuario> usuario = this.getUsuarioByCorreoElectronico(usuarioCredencialesDTO.correoElectronico());
-        if(usuario.isPresent()){
-            Usuario usuarioAux = usuario.get();
-            usuarioAux.setPassword(passwordEncoder.encode(usuarioCredencialesDTO.password()));
-            usuarioRepository.save(usuarioAux);
-            return usuarioMapper.toDTO(usuarioAux);
-        } else {
-            throw new RuntimeException("No existe el usuario");
-        }
     }
 
     @Override
@@ -131,7 +118,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             usuarioRepository.save(usuarioAux);
             return usuarioMapper.toDTO(usuarioAux);
         } else {
-            throw new RuntimeException("No existe el usuario");
+            throw new NoExisteException("No existe el usuario");
         }
     }
 

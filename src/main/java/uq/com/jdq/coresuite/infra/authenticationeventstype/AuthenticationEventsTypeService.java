@@ -4,8 +4,8 @@ import java.util.List;
 
 public interface AuthenticationEventsTypeService {
 
-    List<AuthenticationEventsTypeDTO> getAll();
+    List<AuthenticationEventsTypeDTO> getAll() throws Exception;
 
-    AuthenticationEventsTypeDTO getAuthenticationEventsTypeById(Long id) throws Exception;
+    AuthenticationEventsTypeDTO getAuthenticationEventsTypeById(Integer id) throws Exception;
 
 }

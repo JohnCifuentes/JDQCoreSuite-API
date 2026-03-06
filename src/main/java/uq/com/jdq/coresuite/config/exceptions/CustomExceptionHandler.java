@@ -17,4 +17,9 @@ public class CustomExceptionHandler {
         return ResponseEntity.status(404).body(e.getMessage());
     }
 
+    @ExceptionHandler(value = ReglasCodigoException.class)
+    public ResponseEntity<String> validarReglasCodigoException(ReglasCodigoException e){
+        return ResponseEntity.status(409).body(e.getMessage());
+    }
+
 }
