@@ -11,6 +11,9 @@ import uq.com.jdq.coresuite.catalogo.pais.Pais;
 import uq.com.jdq.coresuite.catalogo.pais.PaisServiceImp;
 import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacion;
 import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacionServiceImp;
+import uq.com.jdq.coresuite.config.exceptions.RegistroRepetidoException;
+import uq.com.jdq.coresuite.notificacion.EmailDTO;
+import uq.com.jdq.coresuite.notificacion.NotificacionService;
 import uq.com.jdq.coresuite.seguridad.rol.CreateRolDTO;
 import uq.com.jdq.coresuite.seguridad.rol.ResponseRolDTO;
 import uq.com.jdq.coresuite.seguridad.rol.RolServiceImpl;
@@ -36,7 +39,7 @@ public class EmpresaServiceImpl implements EmpresaService {
     private final RolServiceImpl rolService;
     private final UsuarioServiceImpl usuarioService;
     private final RolUsuarioServiceImpl rolUsuarioService;
-
+    private final NotificacionService notificacionService;
 
     @Override
     @Transactional
@@ -46,6 +49,16 @@ public class EmpresaServiceImpl implements EmpresaService {
         Departamento departamento = departamentoServicioImp.getDepartamento(createEmpresaDTO.departamentoId());
         Municipio municipio = municipioServiceImp.getMunicipio(createEmpresaDTO.municipioId());
         /**
+         * Validaciones
+         */
+        if (empresaRepository.findByTipoIdentificacionAndNumeroIdentificacion(tipoIdentificacion, createEmpresaDTO.numeroIdentificacion()).isPresent()) {
+            throw new RegistroRepetidoException("Ya existe una empresa registrada con este tipo y número de identificación");
+        }
+        /**/
+        if (empresaRepository.findByCorreoElectronico(createEmpresaDTO.correoElectronico()).isPresent()) {
+            throw new RegistroRepetidoException("Ya existe una empresa registrar con este correo electronico");
+        }
+        /**
          *
          */
         Empresa empresa = empresaMapper.toEntity(createEmpresaDTO);
@@ -53,11 +66,6 @@ public class EmpresaServiceImpl implements EmpresaService {
         empresa.setPais(pais);
         empresa.setDepartamento(departamento);
         empresa.setMunicipio(municipio);
-
-        System.out.println("tipo identificacion :" + tipoIdentificacion.getId());
-        System.out.println("pais :" + pais.getId());
-        System.out.println("departamento :" + departamento.getId());
-        System.out.println("municipio :" + municipio.getId());
         empresa = empresaRepository.save(empresa);
         /**
          * Crear ROL/ADMIN
@@ -75,18 +83,55 @@ public class EmpresaServiceImpl implements EmpresaService {
          */
         CreateRolUsuarioDTO rolUsuarioDTO = new CreateRolUsuarioDTO(empresa.getId(), rol.id(), usuario.id());
         rolUsuarioService.createRolUsuario(rolUsuarioDTO);
+        /**
+         * Notificación vía email
+         */
+        String cuerpo = """
+        Hola %s,
+        
+        ¡Bienvenido a JDQ - CoreSuite!
+        
+        Su empresa ha sido registrada exitosamente en nuestra plataforma.
+        
+        A continuación encontrará sus credenciales de acceso inicial:
+        
+        Usuario: %s
+        
+        Puede acceder al sistema desde el siguiente enlace:
+        https://app.jdq.com
+        
+        Por razones de seguridad, le recomendamos cambiar su contraseña después de iniciar sesión por primera vez.
+ 
+        Atentamente,
+        Equipo JDQ - CoreSuite
+        """.formatted(
+                empresa.getRazonSocial(),
+                usuario.correoElectronico()
+        );
+        EmailDTO emailDTO = new EmailDTO("Bienvenido a JDQ - CoreSuite", cuerpo, usuario.correoElectronico());
+        notificacionService.enviarNotificacion(emailDTO);
         return empresaMapper.toDTO(empresa);
     }
 
     @Override
     @Transactional
     public ResponseEmpresaDTO updateEmpresa(Long id, UpdateEmpresaDTO updateEmpresaDTO) throws Exception {
-        Empresa empresa = empresaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Empresa no encontrada"));
         TipoIdentificacion tipoIdentificacion = tipoIdentificacionServiceImp.getTipoIdentificacion(updateEmpresaDTO.tipoIdentificacionId());
         Pais pais = paisServiceImp.getPais(updateEmpresaDTO.paisId());
         Departamento departamento = departamentoServicioImp.getDepartamento(updateEmpresaDTO.departamentoId());
         Municipio municipio = municipioServiceImp.getMunicipio(updateEmpresaDTO.municipioId());
+        Empresa empresa = empresaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Empresa no encontrada"));
+        /**
+         * Validaciones
+         */
+        if (empresaRepository.findByTipoIdentificacionAndNumeroIdentificacionAndIdNot(tipoIdentificacion, updateEmpresaDTO.numeroIdentificacion(), empresa.getId()).isPresent()) {
+            throw new RegistroRepetidoException("Ya existe una empresa registrada con este tipo y número de identificación");
+        }
+        /**/
+        if (empresaRepository.findByCorreoElectronicoAndIdNot(updateEmpresaDTO.correoElectronico(), empresa.getId()).isPresent()) {
+            throw new RegistroRepetidoException("Ya existe una empresa registrar con este correo electronico");
+        }
         empresaMapper.updateEntityFromDTO(updateEmpresaDTO, empresa);
         empresa.setTipoIdentificacion(tipoIdentificacion);
         empresa.setPais(pais);

@@ -55,6 +55,8 @@ public class JWTFilter extends OncePerRequestFilter {
         }catch (Exception e){
             //Si el token no es válido, enviar un error 401
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            SecurityContextHolder.clearContext();
+            chain.doFilter(request, response);
             return;
         }
         //Continuar con la cadena de filtros
