@@ -201,11 +201,23 @@ public class UsuarioServiceImpl implements UsuarioService {
                     "LoginServiceImp.login"
             );
             authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
-
             return usuarioMapper.toDTO(usuarioAux);
         } else {
             throw new NoExisteException("No existe el usuario");
         }
+    }
+
+    @Override
+    public ResponseUsuarioDTO unblockUsuario(Long id) throws Exception{
+        Optional<Usuario> usuario = usuarioRepository.findById(id);
+        if(usuario.isEmpty()) {
+            throw new NoExisteException("No existe un usuario");
+        }
+        Usuario usuarioAux = usuario.get();
+        usuarioAux.setEstado("A");
+        usuarioAux.setPrimerAcceso(true);
+        usuarioAux =  usuarioRepository.save(usuarioAux);
+        return usuarioMapper.toDTO(usuarioAux);
     }
 
     @Override

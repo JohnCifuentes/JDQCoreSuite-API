@@ -25,6 +25,8 @@ public interface UsuarioService {
 
     ResponseUsuarioDTO blockUsuario(String correoElectronico) throws Exception;
 
+    ResponseUsuarioDTO unblockUsuario(Long id) throws Exception;
+
     Optional<Usuario> getUsuarioByCorreoElectronico(String correoElectronico) throws Exception;
 
 }
