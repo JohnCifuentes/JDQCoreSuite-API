@@ -51,7 +51,7 @@ public class Usuario {
     public String correoElectronico;
 
     @Column(name = "password", nullable = false)
-    public String password;
+    public String password = numeroIdentificacion;
 
     @Column(name = "primer_acceso", nullable = false)
     public boolean primerAcceso = true;

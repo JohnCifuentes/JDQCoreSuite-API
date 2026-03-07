@@ -25,7 +25,6 @@ public class TipoIdentificacionServiceImp implements TipoIdentificacionService {
 
     public TipoIdentificacion getTipoIdentificacion(Long id) throws Exception {
         TipoIdentificacionDTO tipoIdentificacionDTO = getTipoIdentificacionById(id);
-        System.out.println("Tipo de Identificacion: " + tipoIdentificacionDTO);
         return tipoIdentificacionMapper.toEntity(
                 this.getTipoIdentificacionById(id)
         );

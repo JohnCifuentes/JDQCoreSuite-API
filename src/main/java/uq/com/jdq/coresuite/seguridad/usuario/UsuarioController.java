@@ -59,15 +59,16 @@ public class UsuarioController {
     };
 
 
-    @GetMapping("/usuario/correo/password")
+    @GetMapping("/obtener/{correoElectronico}/{password}/usuario")
     @Operation(summary = "", description = "")
-    public ResponseEntity<RespuestaDTO<Usuario>> getUsuarioByCorreoElectronicoAndPassword(@RequestBody UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception{
+    public ResponseEntity<RespuestaDTO<Usuario>> getUsuarioByCorreoElectronicoAndPassword(@PathVariable String correoElectronico, @PathVariable String password) throws Exception{
+        UsuarioCredencialesDTO usuarioCredencialesDTO = new UsuarioCredencialesDTO(correoElectronico, password);
         return ResponseEntity.ok(new RespuestaDTO<>(false, this.usuarioService.getUsuarioByCorreoElectronicoAndPassword(usuarioCredencialesDTO)));
     };
 
     @PutMapping("/recuperar/password")
     @Operation(summary = "", description = "")
-    public ResponseEntity<RespuestaDTO<ResponseUsuarioDTO>> recuperarPassword(UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception {
+    public ResponseEntity<RespuestaDTO<ResponseUsuarioDTO>> recuperarPassword(@RequestBody UsuarioCredencialesDTO usuarioCredencialesDTO) throws Exception {
         return ResponseEntity.ok(new RespuestaDTO<>(false, this.usuarioService.recuperarPassword(usuarioCredencialesDTO)));
     }
 
@@ -79,7 +80,7 @@ public class UsuarioController {
     };
 
     @PutMapping("/{correoElectronico}/bloquear/usuario")
-    public ResponseEntity<RespuestaDTO<ResponseUsuarioDTO>> bloquearUsuario(@RequestParam String correoElectronico) throws Exception {
+    public ResponseEntity<RespuestaDTO<ResponseUsuarioDTO>> bloquearUsuario(@PathVariable String correoElectronico) throws Exception {
         return ResponseEntity.ok(new RespuestaDTO<>(false, this.usuarioService.blockUsuario(correoElectronico)));
     }
 

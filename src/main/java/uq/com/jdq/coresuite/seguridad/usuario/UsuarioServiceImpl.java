@@ -1,6 +1,7 @@
 package uq.com.jdq.coresuite.seguridad.usuario;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -8,9 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacion;
 import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacionRepository;
 import uq.com.jdq.coresuite.config.exceptions.NoExisteException;
+import uq.com.jdq.coresuite.config.exceptions.RegistroRepetidoException;
 import uq.com.jdq.coresuite.infra.autenticationevents.AuthenticationEventsDTO;
 import uq.com.jdq.coresuite.infra.autenticationevents.AuthenticationEventsService;
 import uq.com.jdq.coresuite.infra.authenticationeventstype.AuthenticationEventsTypeService;
+import uq.com.jdq.coresuite.notificacion.EmailDTO;
+import uq.com.jdq.coresuite.notificacion.NotificacionService;
 import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 import uq.com.jdq.coresuite.sistema.empresa.EmpresaRepository;
 
@@ -29,42 +33,75 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationEventsService authenticationEventsService;
     private final AuthenticationEventsTypeService authenticationEventsTypeService;
+    private final NotificacionService notificacionService;
 
     @Override
     @Transactional
     public ResponseUsuarioDTO createUsuario(CreateUsuarioDTO createUsuarioDTO) throws Exception {
         Usuario usuario = usuarioMapper.toEntity(createUsuarioDTO);
-        Empresa empresa = empresaRepository.findById(createUsuarioDTO.empresaId()).orElseThrow(
-            () -> new RuntimeException("No existe la empresa")
-        );
-        TipoIdentificacion tipoIdentificacion = tipoIdentificacionRepository.findById(createUsuarioDTO.tipoIdentificacionId()).orElseThrow(
-            () -> new RuntimeException("No existe el tipo de identificacion")
-        );
-        usuario.setEmpresa(empresa);
-        usuario.setTipoIdentificacion(tipoIdentificacion);
-        if(!this.getUsuarioByCorreoElectronico(createUsuarioDTO.correoElectronico()).isEmpty()){
-            throw new RuntimeException("El correo electronico ya existe");
+        /**
+         *
+         */
+        Optional<Empresa> empresa = empresaRepository.findById(createUsuarioDTO.empresaId());
+        if(empresa.isEmpty()) {
+            throw new NoExisteException("No existe la empresa");
         }
+        /**
+         *
+         */
+        Optional<TipoIdentificacion> tipoIdentificacion = tipoIdentificacionRepository.findById(createUsuarioDTO.tipoIdentificacionId());
+        if(tipoIdentificacion.isEmpty()) {
+            throw new NoExisteException("No existe un tipo de identificacion");
+        }
+        /**
+         *
+         */
+        if(this.getUsuarioByCorreoElectronico(createUsuarioDTO.correoElectronico()).isPresent()){
+            throw new RegistroRepetidoException("El correo electronico ya existe");
+        }
+        /**
+         *
+         */
+        usuario.setEmpresa(empresa.get());
+        usuario.setTipoIdentificacion(tipoIdentificacion.get());
         usuario = usuarioRepository.save(usuario);
+        notificacionService.enviarNotificacion(getEmailDTO(usuario));
         return usuarioMapper.toDTO(usuario);
     }
 
     @Override
     @Transactional
-    public ResponseUsuarioDTO updateUsuario(Long id, UpdateUsuarioDTO updateUsuarioDTO) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        Empresa empresa = empresaRepository.findById(updateUsuarioDTO.empresaId()).orElseThrow(() ->
-                new RuntimeException("No existe la empresa")
-        );
-        TipoIdentificacion tipoIdentificacion = tipoIdentificacionRepository.findById(updateUsuarioDTO.tipoIdentificacionId()).orElseThrow( () ->
-                new RuntimeException("No existe el tipo de identificacion")
-        );
-        usuarioMapper.updateEntityFromDTO(updateUsuarioDTO, usuario);
-        usuario.setEmpresa(empresa);
-        usuario.setTipoIdentificacion(tipoIdentificacion);
-        usuario = usuarioRepository.save(usuario);
-        return usuarioMapper.toDTO(usuario);
+    public ResponseUsuarioDTO updateUsuario(Long id, UpdateUsuarioDTO updateUsuarioDTO) throws Exception {
+        Optional<Empresa> empresa = empresaRepository.findById(updateUsuarioDTO.empresaId());
+        if(empresa.isEmpty()) {
+            throw new NoExisteException("No existe la empresa");
+        }
+        /**
+         *
+         */
+        Optional<TipoIdentificacion> tipoIdentificacion = tipoIdentificacionRepository.findById(updateUsuarioDTO.tipoIdentificacionId());
+        if(tipoIdentificacion.isEmpty()) {
+            throw new NoExisteException("No existe un tipo de identificacion");
+        }
+        /**
+         *
+         */
+        if(this.getUsuarioByCorreoElectronico(updateUsuarioDTO.correoElectronico()).isPresent()){
+            throw new RegistroRepetidoException("El correo electronico ya existe");
+        }
+        /**
+         *
+         */
+        Optional<Usuario> usuario = usuarioRepository.findById(id);
+        if(usuario.isEmpty()) {
+            throw new NoExisteException("No existe un usuario");
+        }
+        Usuario usuarioAux = usuario.get();
+        usuarioMapper.updateEntityFromDTO(updateUsuarioDTO, usuarioAux);
+        usuarioAux.setEmpresa(empresa.get());
+        usuarioAux.setTipoIdentificacion(tipoIdentificacion.get());
+        usuarioAux = usuarioRepository.save(usuarioAux);
+        return usuarioMapper.toDTO(usuarioAux);
     }
 
     @Override
@@ -174,6 +211,35 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public Optional<Usuario> getUsuarioByCorreoElectronico(String correoElectronico) throws Exception {
         return usuarioRepository.findByCorreoElectronico(correoElectronico);
+    }
+
+    private static @NotNull EmailDTO getEmailDTO(Usuario usuario) {
+        String cuerpo = """
+        Hola %s,
+        
+        ¡Bienvenido a JDQ - CoreSuite!
+        
+        Su usuario ha sido registrado exitosamente en nuestra plataforma.
+        
+        A continuación encontrará sus credenciales de acceso inicial:
+        
+        Usuario: %s
+        Contraseña: %s
+        
+        Puede acceder al sistema desde el siguiente enlace:
+        https://app.jdq.com
+        
+        Por razones de seguridad, le recomendamos cambiar su contraseña después de iniciar sesión por primera vez.
+ 
+        Atentamente,
+        Equipo JDQ - CoreSuite
+        """.formatted(
+                (usuario.getNombre1() + ' ' + usuario.getApellido1()),
+                usuario.getCorreoElectronico(),
+                usuario.getNumeroIdentificacion()
+        );
+        EmailDTO emailDTO = new EmailDTO("Bienvenido a JDQ - CoreSuite", cuerpo, usuario.getCorreoElectronico());
+        return emailDTO;
     }
 
 }

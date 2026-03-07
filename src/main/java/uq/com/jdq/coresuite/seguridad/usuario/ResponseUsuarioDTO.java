@@ -23,4 +23,5 @@ public record ResponseUsuarioDTO(
     String usuarioActualizacion,
     LocalDateTime fechaActualizacion
 ) {
+
 }

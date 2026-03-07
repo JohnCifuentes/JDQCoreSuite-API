@@ -93,20 +93,13 @@ public class EmpresaServiceImpl implements EmpresaService {
         
         Su empresa ha sido registrada exitosamente en nuestra plataforma.
         
-        A continuación encontrará sus credenciales de acceso inicial:
-        
-        Usuario: %s
-        
         Puede acceder al sistema desde el siguiente enlace:
         https://app.jdq.com
-        
-        Por razones de seguridad, le recomendamos cambiar su contraseña después de iniciar sesión por primera vez.
  
         Atentamente,
         Equipo JDQ - CoreSuite
         """.formatted(
-                empresa.getRazonSocial(),
-                usuario.correoElectronico()
+                empresa.getRazonSocial()
         );
         EmailDTO emailDTO = new EmailDTO("Bienvenido a JDQ - CoreSuite", cuerpo, usuario.correoElectronico());
         notificacionService.enviarNotificacion(emailDTO);
