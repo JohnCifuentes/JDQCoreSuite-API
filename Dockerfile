@@ -1,7 +1,7 @@
 # =====================================================
 # Stage 1: Builder
 # =====================================================
-FROM gradle:8.5-jdk23-alpine AS builder
+FROM gradle:8.5-jdk21-alpine AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN gradle bootJar --no-daemon -x test
 # =====================================================
 # Stage 2: Runtime
 # =====================================================
-FROM eclipse-temurin:23-jre-alpine AS runtime
+FROM eclipse-temurin:21-jre-alpine AS runtime
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
     apk add --no-cache wget
