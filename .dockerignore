@@ -1,0 +1,42 @@
+# Build outputs
+build/
+target/
+.gradle/
+out/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+*.classpath
+*.project
+*.factorypath
+*.settings
+
+# Git
+.git/
+.gitignore
+
+# Tests
+src/test/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+tmp/
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Gradle wrapper (keep only the jar)
+gradlew.bat
+
+# Docker files
+Dockerfile
+.dockerignore
