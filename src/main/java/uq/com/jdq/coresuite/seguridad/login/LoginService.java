@@ -8,6 +8,4 @@ public interface LoginService {
 
     String cerrarSesion(String correoElectronico) throws Exception;
 
-    String contactAdmin(String correoElectronico) throws Exception;
-
 }

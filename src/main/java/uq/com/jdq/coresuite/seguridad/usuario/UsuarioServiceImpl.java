@@ -202,6 +202,7 @@ public class UsuarioServiceImpl implements UsuarioService {
                     "LoginServiceImp.login"
             );
             authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
+            notificacionService.enviarNotificacion(getEmailDTO(usuarioAux));
             return usuarioMapper.toDTO(usuarioAux);
         } else {
             throw new NoExisteException("No existe el usuario");
@@ -240,7 +241,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         Contraseña: %s
         
         Puede acceder al sistema desde el siguiente enlace:
-        https://app.jdq.com
+        https://jdq-coresuite-app.web.app/
         
         Por razones de seguridad, le recomendamos cambiar su contraseña después de iniciar sesión por primera vez.
  
@@ -252,6 +253,34 @@ public class UsuarioServiceImpl implements UsuarioService {
                 usuario.getNumeroIdentificacion()
         );
         EmailDTO emailDTO = new EmailDTO("Bienvenido a JDQ - CoreSuite", cuerpo, usuario.getCorreoElectronico());
+        return emailDTO;
+    }
+
+    private static @NotNull EmailDTO getEmailDTOBlock(Usuario usuario) {
+        String cuerpo = """
+            Se ha recibido una solicitud de desbloqueo de cuenta en JDQ - CoreSuite.
+
+            El usuario ha sido bloqueado debido a múltiples intentos fallidos de inicio de sesión.
+
+            Información del usuario:
+
+            Tipo de identificación: %s
+            Número de identificación: %s
+            Nombre: %s
+            Correo electrónico: %s
+
+            Por favor verifique la información y, si corresponde, proceda con el desbloqueo de la cuenta desde el panel administrativo.
+
+            Este mensaje fue generado automáticamente por el sistema.
+
+            JDQ - CoreSuite
+            """.formatted(
+                usuario.getTipoIdentificacion().getCodigo(),
+                usuario.getNumeroIdentificacion(),
+                usuario.getNombre1() + ' ' + usuario.getApellido1(),
+                usuario.getCorreoElectronico()
+        );
+        EmailDTO emailDTO = new EmailDTO("Acceso bloqueado", cuerpo, usuario.getEmpresa().getCorreoElectronico());
         return emailDTO;
     }
 
