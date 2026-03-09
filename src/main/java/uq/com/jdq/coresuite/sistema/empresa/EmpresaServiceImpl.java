@@ -56,7 +56,7 @@ public class EmpresaServiceImpl implements EmpresaService {
         }
         /**/
         if (empresaRepository.findByCorreoElectronico(createEmpresaDTO.correoElectronico()).isPresent()) {
-            throw new RegistroRepetidoException("Ya existe una empresa registrar con este correo electronico");
+            throw new RegistroRepetidoException("Ya existe una empresa registrada con este correo electronico");
         }
         /**
          *
@@ -94,7 +94,7 @@ public class EmpresaServiceImpl implements EmpresaService {
         Su empresa ha sido registrada exitosamente en nuestra plataforma.
         
         Puede acceder al sistema desde el siguiente enlace:
-        https://app.jdq.com
+        https://jdq-coresuite-app.web.app/
  
         Atentamente,
         Equipo JDQ - CoreSuite

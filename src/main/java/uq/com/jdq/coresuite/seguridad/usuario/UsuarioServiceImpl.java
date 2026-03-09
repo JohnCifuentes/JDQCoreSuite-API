@@ -64,6 +64,7 @@ public class UsuarioServiceImpl implements UsuarioService {
          */
         usuario.setEmpresa(empresa.get());
         usuario.setTipoIdentificacion(tipoIdentificacion.get());
+        usuario.setPassword(passwordEncoder.encode(createUsuarioDTO.numeroIdentificacion()));
         usuario = usuarioRepository.save(usuario);
         notificacionService.enviarNotificacion(getEmailDTO(usuario));
         return usuarioMapper.toDTO(usuario);
