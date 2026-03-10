@@ -3,6 +3,7 @@ package uq.com.jdq.coresuite.seguridad.rolusuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uq.com.jdq.coresuite.config.exceptions.NoExisteException;
 import uq.com.jdq.coresuite.seguridad.rol.Rol;
 import uq.com.jdq.coresuite.seguridad.rol.RolRepository;
 import uq.com.jdq.coresuite.seguridad.usuario.Usuario;
@@ -25,16 +26,16 @@ public class RolUsuarioServiceImpl implements RolUsuarioService {
 
     @Override
     @Transactional
-    public ResponseRolUsuarioDTO createRolUsuario(CreateRolUsuarioDTO createRolUsuarioDTO) {
+    public ResponseRolUsuarioDTO createRolUsuario(CreateRolUsuarioDTO createRolUsuarioDTO) throws Exception {
         RolUsuario rolUsuario = rolUsuarioMapper.toEntity(createRolUsuarioDTO);
         Empresa empresa = empresaRepository.findById(createRolUsuarioDTO.empresaId()).orElseThrow(() ->
-                new RuntimeException("No existe el empresa")
+                new NoExisteException("No existe la empresa")
         );
         Rol rol = rolRepository.findById(createRolUsuarioDTO.rolId()).orElseThrow(() ->
-                new RuntimeException("No existe el rol")
+                new NoExisteException("No existe el rol")
         );
         Usuario usuario = usuarioRepository.findById(createRolUsuarioDTO.usuarioId()).orElseThrow(() ->
-                new RuntimeException("No existe el usuario")
+                new NoExisteException("No existe el usuario")
         );
         rolUsuario.setEmpresa(empresa);
         rolUsuario.setRol(rol);
@@ -45,17 +46,17 @@ public class RolUsuarioServiceImpl implements RolUsuarioService {
 
     @Override
     @Transactional
-    public ResponseRolUsuarioDTO updateRolUsuario(Long id, UpdateRolUsuarioDTO updateRolUsuarioDTO) {
+    public ResponseRolUsuarioDTO updateRolUsuario(Long id, UpdateRolUsuarioDTO updateRolUsuarioDTO) throws Exception {
         RolUsuario rolUsuario = rolUsuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+                .orElseThrow(() -> new NoExisteException("No existe el rol usuario"));
         Empresa empresa = empresaRepository.findById(updateRolUsuarioDTO.empresaId()).orElseThrow(() ->
-                new RuntimeException("No existe el empresa")
+                new NoExisteException("No existe la empresa")
         );
         Rol rol = rolRepository.findById(updateRolUsuarioDTO.rolId()).orElseThrow(() ->
-                new RuntimeException("No existe el rol")
+                new NoExisteException("No existe el rol")
         );
         Usuario usuario = usuarioRepository.findById(updateRolUsuarioDTO.usuarioId()).orElseThrow(() ->
-                new RuntimeException("No existe el usuario")
+                new NoExisteException("No existe el usuario")
         );
         rolUsuario.setEmpresa(empresa);
         rolUsuario.setRol(rol);
@@ -67,9 +68,9 @@ public class RolUsuarioServiceImpl implements RolUsuarioService {
 
     @Override
     @Transactional
-    public ResponseRolUsuarioDTO inactiveRolUsuario(Long id, InactiveRolUsuarioDTO inactiveRolUsuarioDTO) {
+    public ResponseRolUsuarioDTO inactiveRolUsuario(Long id, InactiveRolUsuarioDTO inactiveRolUsuarioDTO) throws Exception {
         RolUsuario rolUsuario = rolUsuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("RolUsuario not found"));
+                .orElseThrow(() -> new NoExisteException("No existe el rol usuario"));
         rolUsuarioMapper.inactiveEntityFromDTO(inactiveRolUsuarioDTO, rolUsuario);
         rolUsuario = rolUsuarioRepository.save(rolUsuario);
         return rolUsuarioMapper.toDTO(rolUsuario);
@@ -77,7 +78,7 @@ public class RolUsuarioServiceImpl implements RolUsuarioService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ResponseRolUsuarioDTO> getAllRolUsuarios() {
+    public List<ResponseRolUsuarioDTO> getAllRolUsuarios() throws Exception {
         return rolUsuarioRepository.findAll().stream()
                 .map(rolUsuarioMapper::toDTO)
                 .collect(Collectors.toList());
@@ -85,16 +86,16 @@ public class RolUsuarioServiceImpl implements RolUsuarioService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseRolUsuarioDTO getRolUsuarioById(Long id) {
+    public ResponseRolUsuarioDTO getRolUsuarioById(Long id) throws Exception {
         return rolUsuarioRepository.findById(id)
                 .map(rolUsuarioMapper::toDTO)
-                .orElse(null);
+                .orElseThrow(() -> new NoExisteException("No existe el rol usuario"));
     }
 
     @Override
-    public List<ResponseRolUsuarioDTO> getRolUsuariosByEmpresa(Long empresaId) {
+    public List<ResponseRolUsuarioDTO> getRolUsuariosByEmpresa(Long empresaId) throws Exception {
         Empresa empresa = empresaRepository.findById(empresaId).orElseThrow(() ->
-                new RuntimeException("Empresa no encontrado")
+                new NoExisteException("No existe la empresa")
         );
         return rolUsuarioRepository.findByEmpresa(empresa);
     }

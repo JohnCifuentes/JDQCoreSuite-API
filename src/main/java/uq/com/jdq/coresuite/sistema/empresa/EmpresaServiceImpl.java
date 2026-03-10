@@ -11,6 +11,7 @@ import uq.com.jdq.coresuite.catalogo.pais.Pais;
 import uq.com.jdq.coresuite.catalogo.pais.PaisServiceImp;
 import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacion;
 import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacionServiceImp;
+import uq.com.jdq.coresuite.config.exceptions.NoExisteException;
 import uq.com.jdq.coresuite.config.exceptions.RegistroRepetidoException;
 import uq.com.jdq.coresuite.notificacion.EmailDTO;
 import uq.com.jdq.coresuite.notificacion.NotificacionService;
@@ -114,7 +115,7 @@ public class EmpresaServiceImpl implements EmpresaService {
         Departamento departamento = departamentoServicioImp.getDepartamento(updateEmpresaDTO.departamentoId());
         Municipio municipio = municipioServiceImp.getMunicipio(updateEmpresaDTO.municipioId());
         Empresa empresa = empresaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Empresa no encontrada"));
+                .orElseThrow(() -> new NoExisteException("No existe la empresa"));
         /**
          * Validaciones
          */
@@ -136,9 +137,9 @@ public class EmpresaServiceImpl implements EmpresaService {
 
     @Override
     @Transactional
-    public ResponseEmpresaDTO inactiveEmpresa(Long id, InactiveEmpresaDTO inactiveEmpresaDTO) {
+    public ResponseEmpresaDTO inactiveEmpresa(Long id, InactiveEmpresaDTO inactiveEmpresaDTO) throws Exception {
         Empresa empresa = empresaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Empresa no encontrada"));
+                .orElseThrow(() -> new NoExisteException("No existe la empresa"));
         empresaMapper.inactiveEntityFromDTO(inactiveEmpresaDTO, empresa);
         empresa = empresaRepository.save(empresa);
         return empresaMapper.toDTO(empresa);
@@ -146,7 +147,7 @@ public class EmpresaServiceImpl implements EmpresaService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ResponseEmpresaDTO> getAllEmpresas() {
+    public List<ResponseEmpresaDTO> getAllEmpresas() throws Exception {
         return empresaRepository.findAll().stream()
                 .map(empresaMapper::toDTO)
                 .collect(Collectors.toList());
@@ -154,10 +155,10 @@ public class EmpresaServiceImpl implements EmpresaService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEmpresaDTO getEmpresaById(Long id) {
+    public ResponseEmpresaDTO getEmpresaById(Long id) throws Exception {
         return empresaRepository.findById(id)
                 .map(empresaMapper::toDTO)
-                .orElse(null);
+                .orElseThrow(() -> new NoExisteException("No existe la empresa"));
     }
 
 }

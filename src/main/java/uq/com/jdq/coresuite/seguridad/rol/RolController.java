@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uq.com.jdq.coresuite.config.RespuestaDTO;
-import uq.com.jdq.coresuite.sistema.empresa.ResponseEmpresaDTO;
 
 import java.util.List;
 

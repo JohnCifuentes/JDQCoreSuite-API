@@ -8,7 +8,6 @@ import uq.com.jdq.coresuite.config.exceptions.NoExisteException;
 import uq.com.jdq.coresuite.infra.autenticationevents.AuthenticationEventsDTO;
 import uq.com.jdq.coresuite.infra.autenticationevents.AuthenticationEventsService;
 import uq.com.jdq.coresuite.infra.authenticationeventstype.AuthenticationEventsTypeService;
-import uq.com.jdq.coresuite.notificacion.NotificacionService;
 import uq.com.jdq.coresuite.seguridad.usuario.Usuario;
 import uq.com.jdq.coresuite.seguridad.usuario.UsuarioCredencialesDTO;
 import uq.com.jdq.coresuite.seguridad.usuario.UsuarioService;

@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uq.com.jdq.coresuite.config.exceptions.NoExisteException;
+import uq.com.jdq.coresuite.config.exceptions.RegistroRepetidoException;
 import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 import uq.com.jdq.coresuite.sistema.empresa.EmpresaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,19 @@ public class ModuloServiceImpl implements ModuloService {
     public ResponseModuloDTO createModulo(CreateModuloDTO createModuloDTO) throws Exception {
         Empresa empresa = empresaRepository.findById(createModuloDTO.empresaId())
                 .orElseThrow(() -> new NoExisteException("No existe la empresa"));
+        
+        // Validar que no exista un módulo con el mismo nombre en la misma empresa
+        Optional<Modulo> moduloExistenteNombre = moduloRepository.findByEmpresaAndNombre(empresa, createModuloDTO.nombre());
+        if(moduloExistenteNombre.isPresent()) {
+            throw new RegistroRepetidoException("Ya existe un módulo con el nombre " + createModuloDTO.nombre() + " en la empresa");
+        }
+        
+        // Validar que no exista un módulo con el mismo índice en la misma empresa
+        Optional<Modulo> moduloExistenteIndice = moduloRepository.findByEmpresaAndIndice(empresa, createModuloDTO.indice());
+        if(moduloExistenteIndice.isPresent()) {
+            throw new RegistroRepetidoException("Ya existe un módulo con el índice " + createModuloDTO.indice() + " en la empresa");
+        }
+        
         Modulo modulo = moduloMapper.toEntity(createModuloDTO);
         modulo.setEmpresa(empresa);
         modulo = moduloRepository.save(modulo);
@@ -35,6 +50,19 @@ public class ModuloServiceImpl implements ModuloService {
                 .orElseThrow(() -> new NoExisteException("No existe la empresa"));
         Modulo modulo = moduloRepository.findById(id)
                 .orElseThrow(() -> new NoExisteException("No existe el modulo"));
+        
+        // Validar que no exista otro módulo con el mismo nombre en la misma empresa (excluyendo el actual)
+        Optional<Modulo> moduloExistenteNombre = moduloRepository.findByEmpresaAndNombreAndIdNot(empresa, updateModuloDTO.nombre(), id);
+        if(moduloExistenteNombre.isPresent()) {
+            throw new RegistroRepetidoException("Ya existe un módulo con el nombre " + updateModuloDTO.nombre() + " en la empresa");
+        }
+        
+        // Validar que no exista otro módulo con el mismo índice en la misma empresa (excluyendo el actual)
+        Optional<Modulo> moduloExistenteIndice = moduloRepository.findByEmpresaAndIndiceAndIdNot(empresa, updateModuloDTO.indice(), id);
+        if(moduloExistenteIndice.isPresent()) {
+            throw new RegistroRepetidoException("Ya existe un módulo con el índice " + updateModuloDTO.indice() + " en la empresa");
+        }
+        
         moduloMapper.updateEntityFromDTO(updateModuloDTO, modulo);
         modulo.setEmpresa(empresa);
         modulo = moduloRepository.save(modulo);

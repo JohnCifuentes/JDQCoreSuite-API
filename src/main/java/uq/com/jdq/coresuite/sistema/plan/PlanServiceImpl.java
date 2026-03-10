@@ -3,6 +3,7 @@ package uq.com.jdq.coresuite.sistema.plan;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uq.com.jdq.coresuite.config.exceptions.NoExisteException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,7 +17,7 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     @Transactional
-    public ResponsePlanDTO createPlan(CreatePlanDTO createPlanDTO) {
+    public ResponsePlanDTO createPlan(CreatePlanDTO createPlanDTO) throws Exception {
         Plan plan = planMapper.toEntity(createPlanDTO);
         plan = planRepository.save(plan);
         return planMapper.toDTO(plan);
@@ -24,9 +25,9 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     @Transactional
-    public ResponsePlanDTO updatePlan(Long id, UpdatePlanDTO updatePlanDTO) {
+    public ResponsePlanDTO updatePlan(Long id, UpdatePlanDTO updatePlanDTO) throws Exception {
         Plan plan = planRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Plan no encontrado"));
+                .orElseThrow(() -> new NoExisteException("No existe el plan"));
         planMapper.updateEntityFromDTO(updatePlanDTO, plan);
         plan = planRepository.save(plan);
         return planMapper.toDTO(plan);
@@ -34,9 +35,9 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     @Transactional
-    public ResponsePlanDTO inactivePlan(Long id, InactivePlanDTO inactivePlanDTO) {
+    public ResponsePlanDTO inactivePlan(Long id, InactivePlanDTO inactivePlanDTO) throws Exception {
         Plan plan = planRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Plan no encontrado"));
+                .orElseThrow(() -> new NoExisteException("No existe el plan"));
         planMapper.inactiveEntityFromDTO(inactivePlanDTO, plan);
         plan = planRepository.save(plan);
         return planMapper.toDTO(plan);
@@ -44,7 +45,7 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ResponsePlanDTO> getAllPlanes() {
+    public List<ResponsePlanDTO> getAllPlanes() throws Exception {
         return planRepository.findAll().stream()
                 .map(planMapper::toDTO)
                 .collect(Collectors.toList());
@@ -52,10 +53,10 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponsePlanDTO getPlanById(Long id) {
+    public ResponsePlanDTO getPlanById(Long id) throws Exception {
         return planRepository.findById(id)
                 .map(planMapper::toDTO)
-                .orElse(null);
+                .orElseThrow(() -> new NoExisteException("No existe el plan"));
     }
 
 }
