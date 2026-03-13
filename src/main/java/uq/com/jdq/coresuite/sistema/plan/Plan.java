@@ -8,6 +8,9 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Entidad que representa un plan comercial del sistema.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

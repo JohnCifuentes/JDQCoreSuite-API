@@ -18,11 +18,22 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Define la estructura y comportamiento de class JWTFilter.
+ */
 @Component
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
     private final JWTUtils jwtUtil;
 
+    /**
+     * Ejecuta la operacion doFilterInternal.
+     * @param request parametro de entrada.
+     * @param response parametro de entrada.
+     * @param chain parametro de entrada.
+     * @throws ServletException en caso de error durante la operacion.
+     * @throws IOException en caso de error durante la operacion.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)  throws ServletException, IOException {
         //Obtener el token del header de la solicitud
@@ -36,7 +47,7 @@ public class JWTFilter extends OncePerRequestFilter {
             //Validar el token y obtener el payload
             Jws<Claims> payload = jwtUtil.parseJwt(token);
             String username = payload.getPayload().getSubject();
-            //Si el usuario no está autenticado, crear un nuevo objeto de autenticación
+            //Si el usuario no estÃ¡ autenticado, crear un nuevo objeto de autenticaciÃ³n
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 //Crear un objeto UserDetails con el nombre de usuario y el rol
                 UserDetails userDetails = new User(
@@ -44,7 +55,7 @@ public class JWTFilter extends OncePerRequestFilter {
                         "",
                         List.of()
                 );
-                //Crear un objeto de autenticación y establecerlo en el contexto de seguridad
+                //Crear un objeto de autenticaciÃ³n y establecerlo en el contexto de seguridad
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
@@ -53,7 +64,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }catch (Exception e){
-            //Si el token no es válido, enviar un error 401
+            //Si el token no es vÃ¡lido, enviar un error 401
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
             SecurityContextHolder.clearContext();
             chain.doFilter(request, response);
@@ -63,6 +74,11 @@ public class JWTFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
+    /**
+     * Ejecuta la operacion getToken.
+     * @param req parametro de entrada.
+     * @return resultado de la operacion.
+     */
     private String getToken(HttpServletRequest req) {
         String header = req.getHeader("Authorization");
         return header != null && header.startsWith("Bearer ") ? header.replace("Bearer ", "") : null;

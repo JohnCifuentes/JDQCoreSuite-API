@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uq.com.jdq.coresuite.catalogo.pais.Pais;
 
+/**
+ * Entidad que representa un departamento del catalogo geografico.
+ */
 @Setter
 @Getter
 @NoArgsConstructor

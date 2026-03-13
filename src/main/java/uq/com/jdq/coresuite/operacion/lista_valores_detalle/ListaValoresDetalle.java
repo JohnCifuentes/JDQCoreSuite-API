@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uq.com.jdq.coresuite.operacion.lista_valores.ListaValores;
 
+/**
+ * Entidad que representa un detalle o elemento dentro de una lista de valores.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

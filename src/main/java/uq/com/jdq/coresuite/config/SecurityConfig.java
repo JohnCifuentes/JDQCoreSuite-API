@@ -20,6 +20,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Define la estructura y comportamiento de class SecurityConfig.
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -27,25 +30,31 @@ public class SecurityConfig {
 
     private final JWTFilter jwtFilter;
 
+    /**
+     * Ejecuta la operacion securityFilterChain.
+     * @param http parametro de entrada.
+     * @return resultado de la operacion.
+     * @throws Exception en caso de error durante la operacion.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // Configura la seguridad HTTP para la aplicación
+        // Configura la seguridad HTTP para la aplicaciÃ³n
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(req -> req
-                // Swagger público
+                // Swagger pÃºblico
                 .requestMatchers(
                     "/swagger-ui/**",
                     "/v3/api-docs/**"
                 ).permitAll()
-                // SOLO POST público para empresa
+                // SOLO POST pÃºblico para empresa
                 .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/sistema/empresa").permitAll()
                 .requestMatchers("/api/catalogo/**").permitAll()
                 .requestMatchers("/api/seguridad/codigo/**").permitAll()
-                // Rutas públicas específicas de usuario
+                // Rutas pÃºblicas especÃ­ficas de usuario
                 .requestMatchers(
                     "/api/seguridad/usuario/obtener/*/*/usuario",
                     "/api/seguridad/usuario/recuperar/password",
@@ -62,9 +71,13 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Ejecuta la operacion corsConfigurationSource.
+     * @return resultado de la operacion.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        // Configura las políticas de CORS para permitir solicitudes desde el frontend
+        // Configura las polÃ­ticas de CORS para permitir solicitudes desde el frontend
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:4200", "https://jdq-coresuite-app.web.app/", "https://jdq-coresuite-app.firebaseapp.com/"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -78,16 +91,26 @@ public class SecurityConfig {
     }
 
 
+    /**
+     * Ejecuta la operacion passwordEncoder.
+     * @return resultado de la operacion.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Permite codificar y verificar contraseñas utilizando BCrypt
+        // Permite codificar y verificar contraseÃ±as utilizando BCrypt
         return new BCryptPasswordEncoder();
     }
 
 
+    /**
+     * Ejecuta la operacion authenticationManager.
+     * @param configuration parametro de entrada.
+     * @return resultado de la operacion.
+     * @throws Exception en caso de error durante la operacion.
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        // Proporciona un AuthenticationManager para la autenticación de usuarios
+        // Proporciona un AuthenticationManager para la autenticaciÃ³n de usuarios
         return configuration.getAuthenticationManager();
     }
 

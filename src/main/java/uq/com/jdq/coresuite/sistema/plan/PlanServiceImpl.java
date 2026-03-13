@@ -8,6 +8,9 @@ import uq.com.jdq.coresuite.config.exceptions.NoExisteException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementacion del servicio encargado de administrar planes.
+ */
 @Service
 @RequiredArgsConstructor
 public class PlanServiceImpl implements PlanService {
@@ -15,6 +18,12 @@ public class PlanServiceImpl implements PlanService {
     private final PlanRepository planRepository;
     private final PlanMapper planMapper;
 
+    /**
+     * Crea un nuevo plan.
+     * @param createPlanDTO datos del plan.
+     * @return plan creado.
+     * @throws Exception si ocurre un error durante la creacion.
+     */
     @Override
     @Transactional
     public ResponsePlanDTO createPlan(CreatePlanDTO createPlanDTO) throws Exception {
@@ -23,6 +32,13 @@ public class PlanServiceImpl implements PlanService {
         return planMapper.toDTO(plan);
     }
 
+    /**
+     * Actualiza un plan existente.
+     * @param id identificador del plan.
+     * @param updatePlanDTO nuevos datos del plan.
+     * @return plan actualizado.
+     * @throws Exception si el plan no existe.
+     */
     @Override
     @Transactional
     public ResponsePlanDTO updatePlan(Long id, UpdatePlanDTO updatePlanDTO) throws Exception {
@@ -33,6 +49,13 @@ public class PlanServiceImpl implements PlanService {
         return planMapper.toDTO(plan);
     }
 
+    /**
+     * Cambia el estado de un plan.
+     * @param id identificador del plan.
+     * @param inactivePlanDTO datos del nuevo estado.
+     * @return plan actualizado.
+     * @throws Exception si el plan no existe.
+     */
     @Override
     @Transactional
     public ResponsePlanDTO inactivePlan(Long id, InactivePlanDTO inactivePlanDTO) throws Exception {
@@ -43,6 +66,11 @@ public class PlanServiceImpl implements PlanService {
         return planMapper.toDTO(plan);
     }
 
+    /**
+     * Obtiene todos los planes registrados.
+     * @return lista de planes.
+     * @throws Exception si ocurre un error durante la consulta.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ResponsePlanDTO> getAllPlanes() throws Exception {
@@ -51,6 +79,12 @@ public class PlanServiceImpl implements PlanService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Consulta un plan por identificador.
+     * @param id identificador del plan.
+     * @return plan encontrado.
+     * @throws Exception si el plan no existe.
+     */
     @Override
     @Transactional(readOnly = true)
     public ResponsePlanDTO getPlanById(Long id) throws Exception {

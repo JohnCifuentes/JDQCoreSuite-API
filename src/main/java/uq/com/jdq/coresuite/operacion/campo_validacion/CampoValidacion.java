@@ -8,6 +8,9 @@ import lombok.Setter;
 import uq.com.jdq.coresuite.operacion.campo.Campo;
 import uq.com.jdq.coresuite.operacion.tipo_validacion.TipoValidacion;
 
+/**
+ * Entidad que representa la asociacion entre un campo y una regla de validacion.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

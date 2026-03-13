@@ -8,6 +8,9 @@ import uq.com.jdq.coresuite.infra.authenticationeventstype.AuthenticationEventsT
 
 import java.time.LocalDateTime;
 
+/**
+ * Define la estructura y comportamiento de class AuthenticationEvents.
+ */
 @Setter
 @Getter
 @NoArgsConstructor
@@ -19,6 +22,10 @@ public class AuthenticationEvents {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Ejecuta la operacion now.
+     * @return resultado de la operacion.
+     */
     @Column(name = "event_timestamp", nullable = false)
     private LocalDateTime eventTimestamp = LocalDateTime.now();
 

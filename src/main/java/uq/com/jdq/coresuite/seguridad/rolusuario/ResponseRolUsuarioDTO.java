@@ -6,6 +6,9 @@ import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO de respuesta con la informacion de una asignacion rol-usuario.
+ */
 public record ResponseRolUsuarioDTO(
     Long id,
     Empresa empresa,

@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 
+/**
+ * Entidad que representa una lista de valores asociada a una empresa.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

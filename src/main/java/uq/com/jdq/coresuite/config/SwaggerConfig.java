@@ -14,6 +14,9 @@ import org.springframework.context.annotation.Configuration;
     in = SecuritySchemeIn.HEADER
 )
 
+/**
+ * Define la estructura y comportamiento de class SwaggerConfig.
+ */
 public class SwaggerConfig {
 
 }

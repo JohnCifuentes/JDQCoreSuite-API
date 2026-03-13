@@ -4,6 +4,9 @@ import uq.com.jdq.coresuite.operacion.lista_valores.ListaValores;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO de salida para transferir informacion de detalles de listas de valores.
+ */
 public record ResponseListaValoresDetalleDTO(
     Long id,
     ListaValores listaValores,

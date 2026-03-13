@@ -1,5 +1,8 @@
 package uq.com.jdq.coresuite.sistema.empresa;
 
+/**
+ * DTO de entrada para registrar una empresa.
+ */
 public record CreateEmpresaDTO(
     Long tipoIdentificacionId,
     Long paisId,

@@ -7,6 +7,9 @@ import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacion;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO de respuesta con la informacion de una empresa.
+ */
 public record ResponseEmpresaDTO(
     Long id,
     TipoIdentificacion tipoIdentificacion,

@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Implementacion del servicio encargado de administrar roles.
+ */
 @Service
 @RequiredArgsConstructor
 public class RolServiceImpl implements RolService {
@@ -20,6 +23,12 @@ public class RolServiceImpl implements RolService {
     private final RolMapper rolMapper;
     private final EmpresaRepository empresaRepository;
 
+    /**
+     * Registra un nuevo rol validando que no exista otro con el mismo nombre en la empresa.
+     * @param createRolDTO datos del rol a crear.
+     * @return rol creado.
+     * @throws Exception si la empresa no existe o el rol ya esta registrado.
+     */
     @Override
     @Transactional
     public ResponseRolDTO createRol(CreateRolDTO createRolDTO) throws Exception {
@@ -38,6 +47,13 @@ public class RolServiceImpl implements RolService {
         return rolMapper.toDTO(rol);
     }
 
+    /**
+     * Actualiza un rol existente validando unicidad por empresa y nombre.
+     * @param id identificador del rol a actualizar.
+     * @param updateRolDTO nuevos datos del rol.
+     * @return rol actualizado.
+     * @throws Exception si el rol o la empresa no existen, o si el nombre esta repetido.
+     */
     @Override
     @Transactional
     public ResponseRolDTO updateRol(Long id, UpdateRolDTO updateRolDTO) throws Exception {
@@ -58,6 +74,13 @@ public class RolServiceImpl implements RolService {
         return rolMapper.toDTO(rol);
     }
 
+    /**
+     * Cambia el estado de un rol existente.
+     * @param id identificador del rol a inactivar.
+     * @param inactiveRolDTO datos del nuevo estado.
+     * @return rol actualizado.
+     * @throws Exception si el rol no existe.
+     */
     @Override
     @Transactional
     public ResponseRolDTO inactiveRol(Long id, InactiveRolDTO inactiveRolDTO) throws Exception {
@@ -68,6 +91,11 @@ public class RolServiceImpl implements RolService {
         return rolMapper.toDTO(rol);
     }
 
+    /**
+     * Obtiene todos los roles registrados.
+     * @return lista de roles.
+     * @throws Exception si ocurre un error durante la consulta.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseRolDTO> getAllRoles() throws Exception {
@@ -77,6 +105,12 @@ public class RolServiceImpl implements RolService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Consulta un rol por su identificador.
+     * @param id identificador del rol.
+     * @return rol encontrado.
+     * @throws Exception si el rol no existe.
+     */
     @Override
     @Transactional(readOnly = true)
     public ResponseRolDTO getRolById(Long id) throws Exception {
@@ -85,6 +119,12 @@ public class RolServiceImpl implements RolService {
                 .orElseThrow(() -> new NoExisteException("No existe el rol"));
     }
 
+    /**
+     * Obtiene los roles registrados para una empresa.
+     * @param empresaId identificador de la empresa.
+     * @return lista de roles asociados.
+     * @throws Exception si la empresa no existe.
+     */
     @Override
     public List<ResponseRolDTO> getRolsByEmpresa(Long empresaId) throws Exception {
         Empresa empresa = empresaRepository.findById(empresaId)

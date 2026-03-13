@@ -11,6 +11,9 @@ import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacion;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entidad que representa una empresa registrada en el sistema.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

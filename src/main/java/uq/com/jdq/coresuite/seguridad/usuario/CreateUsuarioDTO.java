@@ -1,5 +1,8 @@
 package uq.com.jdq.coresuite.seguridad.usuario;
 
+/**
+ * DTO de entrada para registrar un usuario.
+ */
 public record CreateUsuarioDTO(
     Long empresaId,
     Long tipoIdentificacionId,

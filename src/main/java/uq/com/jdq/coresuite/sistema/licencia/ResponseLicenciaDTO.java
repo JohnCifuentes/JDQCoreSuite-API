@@ -6,6 +6,9 @@ import uq.com.jdq.coresuite.sistema.plan.Plan;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * DTO de respuesta con la informacion de una licencia.
+ */
 public record ResponseLicenciaDTO(
     Long id,
     Empresa empresa,

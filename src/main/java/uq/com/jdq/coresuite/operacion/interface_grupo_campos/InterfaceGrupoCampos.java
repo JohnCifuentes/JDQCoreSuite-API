@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uq.com.jdq.coresuite.operacion.interfaz.Interfaz;
 
+/**
+ * Entidad que representa un grupo de campos asociado a una interfaz.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

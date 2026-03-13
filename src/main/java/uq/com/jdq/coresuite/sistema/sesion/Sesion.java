@@ -9,6 +9,9 @@ import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entidad que representa una sesion de acceso de un usuario.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

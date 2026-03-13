@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Entidad que representa un genero del catalogo.
+ */
 @Setter
 @Getter
 @NoArgsConstructor

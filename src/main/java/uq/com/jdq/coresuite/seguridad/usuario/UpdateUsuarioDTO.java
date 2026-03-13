@@ -1,5 +1,8 @@
 package uq.com.jdq.coresuite.seguridad.usuario;
 
+/**
+ * DTO de entrada para actualizar un usuario.
+ */
 public record UpdateUsuarioDTO(
     Long empresaId,
     Long tipoIdentificacionId,

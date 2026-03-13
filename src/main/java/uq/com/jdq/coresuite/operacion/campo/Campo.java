@@ -10,6 +10,9 @@ import uq.com.jdq.coresuite.operacion.interface_grupo_campos.InterfaceGrupoCampo
 import uq.com.jdq.coresuite.operacion.tipo_campo.TipoCampo;
 import uq.com.jdq.coresuite.operacion.lista_valores.ListaValores;
 
+/**
+ * Entidad que representa un campo configurable dentro de una interfaz operativa.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

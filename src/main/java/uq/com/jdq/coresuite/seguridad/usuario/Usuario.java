@@ -9,6 +9,9 @@ import lombok.Setter;
 import uq.com.jdq.coresuite.catalogo.tipoindetificacion.TipoIdentificacion;
 import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 
+/**
+ * Entidad que representa un usuario del sistema y sus datos de acceso.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

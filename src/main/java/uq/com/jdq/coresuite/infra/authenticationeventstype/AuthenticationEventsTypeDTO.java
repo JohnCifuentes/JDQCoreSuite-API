@@ -2,6 +2,9 @@ package uq.com.jdq.coresuite.infra.authenticationeventstype;
 
 import java.time.LocalDateTime;
 
+/**
+ * Define la estructura y comportamiento de record AuthenticationEventsTypeDTO.
+ */
 public record AuthenticationEventsTypeDTO(
     Long id,
     String name,

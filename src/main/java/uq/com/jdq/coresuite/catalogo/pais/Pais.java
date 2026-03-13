@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Entidad que representa un pais del catalogo geografico.
+ */
 @Setter
 @Getter
 @NoArgsConstructor

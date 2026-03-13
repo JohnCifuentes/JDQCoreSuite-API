@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uq.com.jdq.coresuite.operacion.modulo.Modulo;
 
+/**
+ * Entidad que representa una interfaz funcional dentro de un modulo.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

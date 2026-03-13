@@ -8,6 +8,9 @@ import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entidad que representa un rol de seguridad asociado a una empresa.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

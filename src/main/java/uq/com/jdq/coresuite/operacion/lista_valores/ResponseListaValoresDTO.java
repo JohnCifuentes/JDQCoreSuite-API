@@ -4,6 +4,9 @@ import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO de salida para transferir informacion de listas de valores.
+ */
 public record ResponseListaValoresDTO(
     Long id,
     Empresa empresa,

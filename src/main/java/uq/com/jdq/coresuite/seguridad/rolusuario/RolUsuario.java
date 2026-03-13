@@ -10,6 +10,9 @@ import uq.com.jdq.coresuite.seguridad.usuario.Usuario;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entidad que representa la asignacion de un rol a un usuario dentro de una empresa.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

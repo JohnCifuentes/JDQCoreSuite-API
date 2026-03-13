@@ -9,9 +9,19 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * Define la estructura y comportamiento de class AutenticacionEntryPoint.
+ */
 @Component
 public class AutenticacionEntryPoint implements AuthenticationEntryPoint {
 
+    /**
+     * Ejecuta la operacion commence.
+     * @param request parametro de entrada.
+     * @param response parametro de entrada.
+     * @param authException parametro de entrada.
+     * @throws IOException en caso de error durante la operacion.
+     */
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
 

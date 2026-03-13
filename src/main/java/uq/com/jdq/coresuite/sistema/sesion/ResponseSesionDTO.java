@@ -5,6 +5,9 @@ import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO de respuesta con la informacion de una sesion.
+ */
 public record ResponseSesionDTO(
     Long id,
     Empresa empresa,

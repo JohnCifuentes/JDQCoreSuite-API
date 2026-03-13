@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Implementacion del servicio de administracion y consulta de validaciones de campo.
+ */
 @Service
 @RequiredArgsConstructor
 public class CampoValidacionServiceImpl implements CampoValidacionService {
@@ -22,6 +25,12 @@ public class CampoValidacionServiceImpl implements CampoValidacionService {
     private final CampoRepository campoRepository;
     private final TipoValidacionRepository tipoValidacionRepository;
 
+    /**
+     * Crea una nueva validacion asociada a un campo.
+     * @param createCampoValidacionDTO datos de creacion.
+     * @return validacion creada.
+     * @throws Exception si ocurre un error durante la creacion.
+     */
     @Override
     @Transactional
     public ResponseCampoValidacionDTO createCampoValidacion(CreateCampoValidacionDTO createCampoValidacionDTO) throws Exception {
@@ -34,7 +43,7 @@ public class CampoValidacionServiceImpl implements CampoValidacionService {
         
         Optional<TipoValidacion> tipoValidacion = tipoValidacionRepository.findById(createCampoValidacionDTO.tipoValidacionId());
         if(tipoValidacion.isEmpty()) {
-            throw new NoExisteException("No existe el tipo de validación");
+            throw new NoExisteException("No existe el tipo de validaciÃ³n");
         }
         
         if(createCampoValidacionDTO.campoReferenciaId() != null) {
@@ -51,6 +60,13 @@ public class CampoValidacionServiceImpl implements CampoValidacionService {
         return campoValidacionMapper.toDTO(campoValidacion);
     }
 
+    /**
+     * Actualiza una validacion de campo existente.
+     * @param id identificador de la validacion.
+     * @param updateCampoValidacionDTO datos actualizados.
+     * @return validacion actualizada.
+     * @throws Exception si ocurre un error durante la actualizacion.
+     */
     @Override
     @Transactional
     public ResponseCampoValidacionDTO updateCampoValidacion(Long id, UpdateCampoValidacionDTO updateCampoValidacionDTO) throws Exception {
@@ -61,7 +77,7 @@ public class CampoValidacionServiceImpl implements CampoValidacionService {
         
         Optional<TipoValidacion> tipoValidacion = tipoValidacionRepository.findById(updateCampoValidacionDTO.tipoValidacionId());
         if(tipoValidacion.isEmpty()) {
-            throw new NoExisteException("No existe el tipo de validación");
+            throw new NoExisteException("No existe el tipo de validaciÃ³n");
         }
         
         if(updateCampoValidacionDTO.campoReferenciaId() != null) {
@@ -73,7 +89,7 @@ public class CampoValidacionServiceImpl implements CampoValidacionService {
         
         Optional<CampoValidacion> campoValidacion = campoValidacionRepository.findById(id);
         if(campoValidacion.isEmpty()) {
-            throw new NoExisteException("No existe la validación de campo");
+            throw new NoExisteException("No existe la validaciÃ³n de campo");
         }
         
         CampoValidacion campoValidacionAux = campoValidacion.get();
@@ -92,6 +108,10 @@ public class CampoValidacionServiceImpl implements CampoValidacionService {
         return campoValidacionMapper.toDTO(campoValidacionAux);
     }
 
+    /**
+     * Obtiene la lista completa de validaciones de campo.
+     * @return lista de validaciones.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseCampoValidacionDTO> getAllCampoValidaciones() {
@@ -100,16 +120,28 @@ public class CampoValidacionServiceImpl implements CampoValidacionService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Obtiene una validacion de campo por identificador.
+     * @param id identificador de la validacion.
+     * @return validacion encontrada.
+     * @throws Exception si ocurre un error durante la consulta.
+     */
     @Override
     @Transactional(readOnly = true)
     public ResponseCampoValidacionDTO getCampoValidacionById(Long id) throws Exception {
         Optional<CampoValidacion> campoValidacion = campoValidacionRepository.findById(id);
         if(campoValidacion.isEmpty()) {
-            throw new NoExisteException("No existe la validación de campo");
+            throw new NoExisteException("No existe la validaciÃ³n de campo");
         }
         return campoValidacionMapper.toDTO(campoValidacion.get());
     }
 
+    /**
+     * Obtiene las validaciones asociadas a un campo.
+     * @param campoId identificador del campo.
+     * @return lista de validaciones relacionadas.
+     * @throws Exception si ocurre un error durante la consulta.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseCampoValidacionDTO> getCampoValidacionesByCampo(Long campoId) throws Exception {

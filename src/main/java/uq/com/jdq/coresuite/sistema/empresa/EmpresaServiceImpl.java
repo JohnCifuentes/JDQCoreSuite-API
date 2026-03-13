@@ -23,10 +23,17 @@ import uq.com.jdq.coresuite.seguridad.rolusuario.RolUsuarioServiceImpl;
 import uq.com.jdq.coresuite.seguridad.usuario.CreateUsuarioDTO;
 import uq.com.jdq.coresuite.seguridad.usuario.ResponseUsuarioDTO;
 import uq.com.jdq.coresuite.seguridad.usuario.UsuarioServiceImpl;
+import uq.com.jdq.coresuite.sistema.licencia.CreateLicenciaDTO;
+import uq.com.jdq.coresuite.sistema.licencia.LicenciaServiceImpl;
+import uq.com.jdq.coresuite.sistema.sesion.SesionServiceImpl;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementacion del servicio encargado de administrar empresas.
+ */
 @Service
 @RequiredArgsConstructor
 public class EmpresaServiceImpl implements EmpresaService {
@@ -37,11 +44,18 @@ public class EmpresaServiceImpl implements EmpresaService {
     private final PaisServiceImp paisServiceImp;
     private final DepartamentoServiceImp departamentoServicioImp;
     private final MunicipioServiceImp municipioServiceImp;
+    private final LicenciaServiceImpl licenciaService;
     private final RolServiceImpl rolService;
     private final UsuarioServiceImpl usuarioService;
     private final RolUsuarioServiceImpl rolUsuarioService;
     private final NotificacionService notificacionService;
 
+    /**
+     * Crea una empresa, su configuracion inicial y los recursos base de seguridad.
+     * @param createEmpresaDTO datos de la empresa.
+     * @return empresa creada.
+     * @throws Exception si ocurre un error de negocio durante el registro.
+     */
     @Override
     @Transactional
     public ResponseEmpresaDTO createEmpresa(CreateEmpresaDTO createEmpresaDTO) throws Exception {
@@ -53,7 +67,7 @@ public class EmpresaServiceImpl implements EmpresaService {
          * Validaciones
          */
         if (empresaRepository.findByTipoIdentificacionAndNumeroIdentificacion(tipoIdentificacion, createEmpresaDTO.numeroIdentificacion()).isPresent()) {
-            throw new RegistroRepetidoException("Ya existe una empresa registrada con este tipo y número de identificación");
+            throw new RegistroRepetidoException("Ya existe una empresa registrada con este tipo y nÃºmero de identificaciÃ³n");
         }
         /**/
         if (empresaRepository.findByCorreoElectronico(createEmpresaDTO.correoElectronico()).isPresent()) {
@@ -85,12 +99,17 @@ public class EmpresaServiceImpl implements EmpresaService {
         CreateRolUsuarioDTO rolUsuarioDTO = new CreateRolUsuarioDTO(empresa.getId(), rol.id(), usuario.id());
         rolUsuarioService.createRolUsuario(rolUsuarioDTO);
         /**
-         * Notificación vía email
+         *
+         */
+        CreateLicenciaDTO licenciaDTO = new CreateLicenciaDTO(empresa.getId(), 2L, LocalDate.now(), LocalDate.now().plusMonths(3), true);
+        licenciaService.createLicencia(licenciaDTO);
+        /**
+         * NotificaciÃ³n vÃ­a email
          */
         String cuerpo = """
         Hola %s,
         
-        ¡Bienvenido a JDQ - CoreSuite!
+        Â¡Bienvenido a JDQ - CoreSuite!
         
         Su empresa ha sido registrada exitosamente en nuestra plataforma.
         
@@ -107,6 +126,13 @@ public class EmpresaServiceImpl implements EmpresaService {
         return empresaMapper.toDTO(empresa);
     }
 
+    /**
+     * Actualiza una empresa existente validando unicidad de identificacion y correo.
+     * @param id identificador de la empresa.
+     * @param updateEmpresaDTO nuevos datos de la empresa.
+     * @return empresa actualizada.
+     * @throws Exception si ocurre un error de negocio.
+     */
     @Override
     @Transactional
     public ResponseEmpresaDTO updateEmpresa(Long id, UpdateEmpresaDTO updateEmpresaDTO) throws Exception {
@@ -120,7 +146,7 @@ public class EmpresaServiceImpl implements EmpresaService {
          * Validaciones
          */
         if (empresaRepository.findByTipoIdentificacionAndNumeroIdentificacionAndIdNot(tipoIdentificacion, updateEmpresaDTO.numeroIdentificacion(), empresa.getId()).isPresent()) {
-            throw new RegistroRepetidoException("Ya existe una empresa registrada con este tipo y número de identificación");
+            throw new RegistroRepetidoException("Ya existe una empresa registrada con este tipo y nÃºmero de identificaciÃ³n");
         }
         /**/
         if (empresaRepository.findByCorreoElectronicoAndIdNot(updateEmpresaDTO.correoElectronico(), empresa.getId()).isPresent()) {
@@ -135,6 +161,13 @@ public class EmpresaServiceImpl implements EmpresaService {
         return empresaMapper.toDTO(empresa);
     }
 
+    /**
+     * Cambia el estado de una empresa.
+     * @param id identificador de la empresa.
+     * @param inactiveEmpresaDTO datos del nuevo estado.
+     * @return empresa actualizada.
+     * @throws Exception si la empresa no existe.
+     */
     @Override
     @Transactional
     public ResponseEmpresaDTO inactiveEmpresa(Long id, InactiveEmpresaDTO inactiveEmpresaDTO) throws Exception {
@@ -145,6 +178,11 @@ public class EmpresaServiceImpl implements EmpresaService {
         return empresaMapper.toDTO(empresa);
     }
 
+    /**
+     * Obtiene todas las empresas registradas.
+     * @return lista de empresas.
+     * @throws Exception si ocurre un error durante la consulta.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseEmpresaDTO> getAllEmpresas() throws Exception {
@@ -153,6 +191,12 @@ public class EmpresaServiceImpl implements EmpresaService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Consulta una empresa por identificador.
+     * @param id identificador de la empresa.
+     * @return empresa encontrada.
+     * @throws Exception si la empresa no existe.
+     */
     @Override
     @Transactional(readOnly = true)
     public ResponseEmpresaDTO getEmpresaById(Long id) throws Exception {

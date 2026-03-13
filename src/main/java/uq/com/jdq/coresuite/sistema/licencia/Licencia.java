@@ -10,6 +10,9 @@ import uq.com.jdq.coresuite.sistema.plan.Plan;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Entidad que representa la licencia activa o historica de una empresa.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

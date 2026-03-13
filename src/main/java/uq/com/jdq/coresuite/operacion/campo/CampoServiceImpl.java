@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Implementacion del servicio de administracion y consulta de campos.
+ */
 @Service
 @RequiredArgsConstructor
 public class CampoServiceImpl implements CampoService {
@@ -29,6 +32,12 @@ public class CampoServiceImpl implements CampoService {
     private final TipoCampoRepository tipoCampoRepository;
     private final ListaValoresRepository listaValoresRepository;
 
+    /**
+     * Crea un nuevo campo.
+     * @param createCampoDTO datos de creacion del campo.
+     * @return campo creado.
+     * @throws Exception si ocurre un error durante la creacion.
+     */
     @Override
     @Transactional
     public ResponseCampoDTO createCampo(CreateCampoDTO createCampoDTO) throws Exception {
@@ -45,10 +54,10 @@ public class CampoServiceImpl implements CampoService {
             throw new RegistroRepetidoException("Ya existe un campo con el nombre " + createCampoDTO.nombre() + " en la interfaz");
         }
         
-        // Validar que no exista un campo con el mismo índice en la misma interfaz
+        // Validar que no exista un campo con el mismo Ã­ndice en la misma interfaz
         Optional<Campo> campoExistenteIndice = campoRepository.findByInterfazAndIndice(interfaz.get(), createCampoDTO.indice());
         if(campoExistenteIndice.isPresent()) {
-            throw new RegistroRepetidoException("Ya existe un campo con el índice " + createCampoDTO.indice() + " en la interfaz");
+            throw new RegistroRepetidoException("Ya existe un campo con el Ã­ndice " + createCampoDTO.indice() + " en la interfaz");
         }
         
         if(createCampoDTO.interfaceGrupoCamposId() != null) {
@@ -78,6 +87,13 @@ public class CampoServiceImpl implements CampoService {
         return campoMapper.toDTO(campo);
     }
 
+    /**
+     * Actualiza un campo existente.
+     * @param id identificador del campo.
+     * @param updateCampoDTO datos actualizados del campo.
+     * @return campo actualizado.
+     * @throws Exception si ocurre un error durante la actualizacion.
+     */
     @Override
     @Transactional
     public ResponseCampoDTO updateCampo(Long id, UpdateCampoDTO updateCampoDTO) throws Exception {
@@ -92,10 +108,10 @@ public class CampoServiceImpl implements CampoService {
             throw new RegistroRepetidoException("Ya existe un campo con el nombre " + updateCampoDTO.nombre() + " en la interfaz");
         }
         
-        // Validar que no exista otro campo con el mismo índice en la misma interfaz (excluyendo el actual)
+        // Validar que no exista otro campo con el mismo Ã­ndice en la misma interfaz (excluyendo el actual)
         Optional<Campo> campoExistenteIndice = campoRepository.findByInterfazAndIndiceAndIdNot(interfaz.get(), updateCampoDTO.indice(), id);
         if(campoExistenteIndice.isPresent()) {
-            throw new RegistroRepetidoException("Ya existe un campo con el índice " + updateCampoDTO.indice() + " en la interfaz");
+            throw new RegistroRepetidoException("Ya existe un campo con el Ã­ndice " + updateCampoDTO.indice() + " en la interfaz");
         }
         
         if(updateCampoDTO.interfaceGrupoCamposId() != null) {
@@ -145,6 +161,10 @@ public class CampoServiceImpl implements CampoService {
         return campoMapper.toDTO(campoAux);
     }
 
+    /**
+     * Obtiene la lista completa de campos.
+     * @return lista de campos.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseCampoDTO> getAllCampos() {
@@ -153,6 +173,12 @@ public class CampoServiceImpl implements CampoService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Obtiene un campo por identificador.
+     * @param id identificador del campo.
+     * @return campo encontrado.
+     * @throws Exception si ocurre un error durante la consulta.
+     */
     @Override
     @Transactional(readOnly = true)
     public ResponseCampoDTO getCampoById(Long id) throws Exception {
@@ -163,6 +189,12 @@ public class CampoServiceImpl implements CampoService {
         return campoMapper.toDTO(campo.get());
     }
 
+    /**
+     * Obtiene los campos asociados a una interfaz.
+     * @param interfazId identificador de la interfaz.
+     * @return lista de campos de la interfaz.
+     * @throws Exception si ocurre un error durante la consulta.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseCampoDTO> getCamposByInterfaz(Long interfazId) throws Exception {

@@ -6,6 +6,9 @@ import uq.com.jdq.coresuite.operacion.interface_grupo_campos.InterfaceGrupoCampo
 import uq.com.jdq.coresuite.operacion.tipo_campo.TipoCampo;
 import uq.com.jdq.coresuite.operacion.lista_valores.ListaValores;
 
+/**
+ * DTO de salida para transferir informacion de campos.
+ */
 public record ResponseCampoDTO(
     Long id,
     Interfaz interfaz,

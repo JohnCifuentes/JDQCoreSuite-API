@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Implementacion del servicio de administracion y consulta de grupos de campos por interfaz.
+ */
 @Service
 @RequiredArgsConstructor
 public class InterfaceGrupoCamposServiceImpl implements InterfaceGrupoCamposService {
@@ -20,6 +23,12 @@ public class InterfaceGrupoCamposServiceImpl implements InterfaceGrupoCamposServ
     private final InterfaceGrupoCamposMapper interfaceGrupoCamposMapper;
     private final InterfazRepository interfazRepository;
 
+    /**
+     * Crea un nuevo grupo de campos asociado a una interfaz.
+     * @param createInterfaceGrupoCamposDTO datos de creacion.
+     * @return grupo de campos creado.
+     * @throws Exception si ocurre un error durante la creacion.
+     */
     @Override
     @Transactional
     public ResponseInterfaceGrupoCamposDTO createInterfaceGrupoCampos(CreateInterfaceGrupoCamposDTO createInterfaceGrupoCamposDTO) throws Exception {
@@ -36,10 +45,10 @@ public class InterfaceGrupoCamposServiceImpl implements InterfaceGrupoCamposServ
             throw new RegistroRepetidoException("Ya existe un grupo de campos con el nombre " + createInterfaceGrupoCamposDTO.nombre() + " en la interfaz");
         }
         
-        // Validar que no exista un grupo de campos con el mismo índice en la misma interfaz
+        // Validar que no exista un grupo de campos con el mismo Ã­ndice en la misma interfaz
         Optional<InterfaceGrupoCampos> grupoExistenteIndice = interfaceGrupoCamposRepository.findByInterfazAndIndice(interfaz.get(), createInterfaceGrupoCamposDTO.indice());
         if(grupoExistenteIndice.isPresent()) {
-            throw new RegistroRepetidoException("Ya existe un grupo de campos con el índice " + createInterfaceGrupoCamposDTO.indice() + " en la interfaz");
+            throw new RegistroRepetidoException("Ya existe un grupo de campos con el Ã­ndice " + createInterfaceGrupoCamposDTO.indice() + " en la interfaz");
         }
         
         interfaceGrupoCampos.setInterfaz(interfaz.get());
@@ -47,6 +56,13 @@ public class InterfaceGrupoCamposServiceImpl implements InterfaceGrupoCamposServ
         return interfaceGrupoCamposMapper.toDTO(interfaceGrupoCampos);
     }
 
+    /**
+     * Actualiza un grupo de campos existente.
+     * @param id identificador del grupo de campos.
+     * @param updateInterfaceGrupoCamposDTO datos actualizados.
+     * @return grupo de campos actualizado.
+     * @throws Exception si ocurre un error durante la actualizacion.
+     */
     @Override
     @Transactional
     public ResponseInterfaceGrupoCamposDTO updateInterfaceGrupoCampos(Long id, UpdateInterfaceGrupoCamposDTO updateInterfaceGrupoCamposDTO) throws Exception {
@@ -66,10 +82,10 @@ public class InterfaceGrupoCamposServiceImpl implements InterfaceGrupoCamposServ
             throw new RegistroRepetidoException("Ya existe un grupo de campos con el nombre " + updateInterfaceGrupoCamposDTO.nombre() + " en la interfaz");
         }
         
-        // Validar que no exista otro grupo de campos con el mismo índice en la misma interfaz (excluyendo el actual)
+        // Validar que no exista otro grupo de campos con el mismo Ã­ndice en la misma interfaz (excluyendo el actual)
         Optional<InterfaceGrupoCampos> grupoExistenteIndice = interfaceGrupoCamposRepository.findByInterfazAndIndiceAndIdNot(interfaz.get(), updateInterfaceGrupoCamposDTO.indice(), id);
         if(grupoExistenteIndice.isPresent()) {
-            throw new RegistroRepetidoException("Ya existe un grupo de campos con el índice " + updateInterfaceGrupoCamposDTO.indice() + " en la interfaz");
+            throw new RegistroRepetidoException("Ya existe un grupo de campos con el Ã­ndice " + updateInterfaceGrupoCamposDTO.indice() + " en la interfaz");
         }
         
         InterfaceGrupoCampos interfaceGrupoCamposAux = interfaceGrupoCampos.get();
@@ -79,6 +95,10 @@ public class InterfaceGrupoCamposServiceImpl implements InterfaceGrupoCamposServ
         return interfaceGrupoCamposMapper.toDTO(interfaceGrupoCamposAux);
     }
 
+    /**
+     * Obtiene la lista completa de grupos de campos.
+     * @return lista de grupos de campos.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseInterfaceGrupoCamposDTO> getAllInterfaceGrupoCampos() {
@@ -87,6 +107,12 @@ public class InterfaceGrupoCamposServiceImpl implements InterfaceGrupoCamposServ
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Obtiene un grupo de campos por identificador.
+     * @param id identificador del grupo de campos.
+     * @return grupo de campos encontrado.
+     * @throws Exception si ocurre un error durante la consulta.
+     */
     @Override
     @Transactional(readOnly = true)
     public ResponseInterfaceGrupoCamposDTO getInterfaceGrupoCamposById(Long id) throws Exception {
@@ -97,6 +123,12 @@ public class InterfaceGrupoCamposServiceImpl implements InterfaceGrupoCamposServ
         return interfaceGrupoCamposMapper.toDTO(interfaceGrupoCampos.get());
     }
 
+    /**
+     * Obtiene los grupos de campos asociados a una interfaz.
+     * @param interfazId identificador de la interfaz.
+     * @return lista de grupos de campos relacionadas.
+     * @throws Exception si ocurre un error durante la consulta.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseInterfaceGrupoCamposDTO> getInterfaceGrupoCamposByInterfaz(Long interfazId) throws Exception {

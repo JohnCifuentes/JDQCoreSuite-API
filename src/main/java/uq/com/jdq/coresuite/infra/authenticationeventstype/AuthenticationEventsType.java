@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * Define la estructura y comportamiento de class AuthenticationEventsType.
+ */
 @Setter
 @Getter
 @NoArgsConstructor

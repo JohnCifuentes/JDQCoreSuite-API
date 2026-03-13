@@ -10,10 +10,17 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 
+/**
+ * Define la estructura y comportamiento de class NotificacionServiceImp.
+ */
 @Service
 @RequiredArgsConstructor
 public class NotificacionServiceImp implements NotificacionService {
 
+    /**
+     * Ejecuta la operacion enviarNotificacion.
+     * @param emailDTO parametro de entrada.
+     */
     @Async
     @Override
     public void enviarNotificacion(EmailDTO emailDTO) {

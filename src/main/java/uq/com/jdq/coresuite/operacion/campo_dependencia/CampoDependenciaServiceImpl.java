@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Implementacion del servicio de administracion y consulta de dependencias de campo.
+ */
 @Service
 @RequiredArgsConstructor
 public class CampoDependenciaServiceImpl implements CampoDependenciaService {
@@ -19,6 +22,12 @@ public class CampoDependenciaServiceImpl implements CampoDependenciaService {
     private final CampoDependenciaMapper campoDependenciaMapper;
     private final CampoRepository campoRepository;
 
+    /**
+     * Crea una nueva dependencia entre campos.
+     * @param createCampoDependenciaDTO datos de creacion de la dependencia.
+     * @return dependencia creada.
+     * @throws Exception si ocurre un error durante la creacion.
+     */
     @Override
     @Transactional
     public ResponseCampoDependenciaDTO createCampoDependencia(CreateCampoDependenciaDTO createCampoDependenciaDTO) throws Exception {
@@ -40,6 +49,13 @@ public class CampoDependenciaServiceImpl implements CampoDependenciaService {
         return campoDependenciaMapper.toDTO(campoDependencia);
     }
 
+    /**
+     * Actualiza una dependencia de campo existente.
+     * @param id identificador de la dependencia.
+     * @param updateCampoDependenciaDTO datos actualizados de la dependencia.
+     * @return dependencia actualizada.
+     * @throws Exception si ocurre un error durante la actualizacion.
+     */
     @Override
     @Transactional
     public ResponseCampoDependenciaDTO updateCampoDependencia(Long id, UpdateCampoDependenciaDTO updateCampoDependenciaDTO) throws Exception {
@@ -66,6 +82,10 @@ public class CampoDependenciaServiceImpl implements CampoDependenciaService {
         return campoDependenciaMapper.toDTO(campoDependenciaAux);
     }
 
+    /**
+     * Obtiene la lista completa de dependencias de campo.
+     * @return lista de dependencias.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseCampoDependenciaDTO> getAllCampoDependencias() {
@@ -74,6 +94,12 @@ public class CampoDependenciaServiceImpl implements CampoDependenciaService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Obtiene una dependencia de campo por identificador.
+     * @param id identificador de la dependencia.
+     * @return dependencia encontrada.
+     * @throws Exception si ocurre un error durante la consulta.
+     */
     @Override
     @Transactional(readOnly = true)
     public ResponseCampoDependenciaDTO getCampoDependenciaById(Long id) throws Exception {
@@ -84,6 +110,12 @@ public class CampoDependenciaServiceImpl implements CampoDependenciaService {
         return campoDependenciaMapper.toDTO(campoDependencia.get());
     }
 
+    /**
+     * Obtiene las dependencias asociadas a un campo.
+     * @param campoId identificador del campo.
+     * @return lista de dependencias del campo.
+     * @throws Exception si ocurre un error durante la consulta.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseCampoDependenciaDTO> getCampoDependenciasByCampo(Long campoId) throws Exception {

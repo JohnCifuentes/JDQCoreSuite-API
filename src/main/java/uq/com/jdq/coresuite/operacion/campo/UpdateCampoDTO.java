@@ -1,5 +1,8 @@
 package uq.com.jdq.coresuite.operacion.campo;
 
+/**
+ * DTO de entrada para la actualizacion de campos.
+ */
 public record UpdateCampoDTO(
     Long interfazId,
     Long interfaceGrupoCamposId,

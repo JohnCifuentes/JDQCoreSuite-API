@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Implementacion del servicio de administracion y consulta de interfaces.
+ */
 @Service
 @RequiredArgsConstructor
 public class InterfazServiceImpl implements InterfazService {
@@ -20,6 +23,12 @@ public class InterfazServiceImpl implements InterfazService {
     private final InterfazMapper interfazMapper;
     private final ModuloRepository moduloRepository;
 
+    /**
+     * Crea una nueva interfaz.
+     * @param createInterfazDTO datos de creacion.
+     * @return interfaz creada.
+     * @throws Exception si ocurre un error durante la creacion.
+     */
     @Override
     @Transactional
     public ResponseInterfazDTO createInterfaz(CreateInterfazDTO createInterfazDTO) throws Exception {
@@ -27,19 +36,19 @@ public class InterfazServiceImpl implements InterfazService {
         
         Optional<Modulo> modulo = moduloRepository.findById(createInterfazDTO.moduloId());
         if(modulo.isEmpty()) {
-            throw new NoExisteException("No existe el módulo");
+            throw new NoExisteException("No existe el mÃ³dulo");
         }
         
-        // Validar que no exista una interfaz con el mismo nombre en el mismo módulo
+        // Validar que no exista una interfaz con el mismo nombre en el mismo mÃ³dulo
         Optional<Interfaz> interfazExistenteNombre = interfazRepository.findByModuloAndNombre(modulo.get(), createInterfazDTO.nombre());
         if(interfazExistenteNombre.isPresent()) {
-            throw new RegistroRepetidoException("Ya existe una interfaz con el nombre " + createInterfazDTO.nombre() + " en el módulo");
+            throw new RegistroRepetidoException("Ya existe una interfaz con el nombre " + createInterfazDTO.nombre() + " en el mÃ³dulo");
         }
         
-        // Validar que no exista una interfaz con el mismo índice en el mismo módulo
+        // Validar que no exista una interfaz con el mismo Ã­ndice en el mismo mÃ³dulo
         Optional<Interfaz> interfazExistenteIndice = interfazRepository.findByModuloAndIndice(modulo.get(), createInterfazDTO.indice());
         if(interfazExistenteIndice.isPresent()) {
-            throw new RegistroRepetidoException("Ya existe una interfaz con el índice " + createInterfazDTO.indice() + " en el módulo");
+            throw new RegistroRepetidoException("Ya existe una interfaz con el Ã­ndice " + createInterfazDTO.indice() + " en el mÃ³dulo");
         }
         
         interfaz.setModulo(modulo.get());
@@ -47,12 +56,19 @@ public class InterfazServiceImpl implements InterfazService {
         return interfazMapper.toDTO(interfaz);
     }
 
+    /**
+     * Actualiza una interfaz existente.
+     * @param id identificador de la interfaz.
+     * @param updateInterfazDTO datos actualizados.
+     * @return interfaz actualizada.
+     * @throws Exception si ocurre un error durante la actualizacion.
+     */
     @Override
     @Transactional
     public ResponseInterfazDTO updateInterfaz(Long id, UpdateInterfazDTO updateInterfazDTO) throws Exception {
         Optional<Modulo> modulo = moduloRepository.findById(updateInterfazDTO.moduloId());
         if(modulo.isEmpty()) {
-            throw new NoExisteException("No existe el módulo");
+            throw new NoExisteException("No existe el mÃ³dulo");
         }
         
         Optional<Interfaz> interfaz = interfazRepository.findById(id);
@@ -60,16 +76,16 @@ public class InterfazServiceImpl implements InterfazService {
             throw new NoExisteException("No existe la interfaz");
         }
         
-        // Validar que no exista otra interfaz con el mismo nombre en el mismo módulo (excluyendo la actual)
+        // Validar que no exista otra interfaz con el mismo nombre en el mismo mÃ³dulo (excluyendo la actual)
         Optional<Interfaz> interfazExistenteNombre = interfazRepository.findByModuloAndNombreAndIdNot(modulo.get(), updateInterfazDTO.nombre(), id);
         if(interfazExistenteNombre.isPresent()) {
-            throw new RegistroRepetidoException("Ya existe una interfaz con el nombre " + updateInterfazDTO.nombre() + " en el módulo");
+            throw new RegistroRepetidoException("Ya existe una interfaz con el nombre " + updateInterfazDTO.nombre() + " en el mÃ³dulo");
         }
         
-        // Validar que no exista otra interfaz con el mismo índice en el mismo módulo (excluyendo la actual)
+        // Validar que no exista otra interfaz con el mismo Ã­ndice en el mismo mÃ³dulo (excluyendo la actual)
         Optional<Interfaz> interfazExistenteIndice = interfazRepository.findByModuloAndIndiceAndIdNot(modulo.get(), updateInterfazDTO.indice(), id);
         if(interfazExistenteIndice.isPresent()) {
-            throw new RegistroRepetidoException("Ya existe una interfaz con el índice " + updateInterfazDTO.indice() + " en el módulo");
+            throw new RegistroRepetidoException("Ya existe una interfaz con el Ã­ndice " + updateInterfazDTO.indice() + " en el mÃ³dulo");
         }
         
         Interfaz interfazAux = interfaz.get();
@@ -79,6 +95,10 @@ public class InterfazServiceImpl implements InterfazService {
         return interfazMapper.toDTO(interfazAux);
     }
 
+    /**
+     * Obtiene la lista completa de interfaces.
+     * @return lista de interfaces.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseInterfazDTO> getAllInterfaz() {
@@ -87,6 +107,12 @@ public class InterfazServiceImpl implements InterfazService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Obtiene una interfaz por identificador.
+     * @param id identificador de la interfaz.
+     * @return interfaz encontrada.
+     * @throws Exception si ocurre un error durante la consulta.
+     */
     @Override
     @Transactional(readOnly = true)
     public ResponseInterfazDTO getInterfazById(Long id) throws Exception {
@@ -97,11 +123,17 @@ public class InterfazServiceImpl implements InterfazService {
         return interfazMapper.toDTO(interfaz.get());
     }
 
+    /**
+     * Obtiene las interfaces asociadas a un modulo.
+     * @param moduloId identificador del modulo.
+     * @return lista de interfaces relacionadas.
+     * @throws Exception si ocurre un error durante la consulta.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseInterfazDTO> getInterfazByModulo(Long moduloId) throws Exception {
         Modulo modulo = moduloRepository.findById(moduloId).orElseThrow(() ->
-                new NoExisteException("No existe el módulo")
+                new NoExisteException("No existe el mÃ³dulo")
         );
         return interfazRepository.findByModulo(modulo);
     }

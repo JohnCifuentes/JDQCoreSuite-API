@@ -8,6 +8,9 @@ import uq.com.jdq.coresuite.seguridad.usuario.Usuario;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entidad que representa un codigo de verificacion asociado a un usuario.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

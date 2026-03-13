@@ -12,6 +12,9 @@ import uq.com.jdq.coresuite.sistema.plan.PlanRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementacion del servicio encargado de administrar licencias.
+ */
 @Service
 @RequiredArgsConstructor
 public class LicenciaServiceImpl implements LicenciaService {
@@ -21,6 +24,12 @@ public class LicenciaServiceImpl implements LicenciaService {
     private final EmpresaRepository empresaRepository;
     private final PlanRepository planRepository;
 
+        /**
+         * Crea una licencia y asocia la empresa y el plan correspondientes.
+         * @param createLicenciaDTO datos de la licencia.
+         * @return licencia creada.
+         * @throws Exception si la empresa o el plan no existen.
+         */
     @Override
     @Transactional
     public ResponseLicenciaDTO createLicencia(CreateLicenciaDTO createLicenciaDTO) throws Exception {
@@ -37,6 +46,13 @@ public class LicenciaServiceImpl implements LicenciaService {
         return licenciaMapper.toDTO(licencia);
     }
 
+        /**
+         * Actualiza una licencia existente.
+         * @param id identificador de la licencia.
+         * @param updateLicenciaDTO nuevos datos de la licencia.
+         * @return licencia actualizada.
+         * @throws Exception si la licencia, empresa o plan no existen.
+         */
     @Override
     @Transactional
     public ResponseLicenciaDTO updateLicencia(Long id, UpdateLicenciaDTO updateLicenciaDTO) throws Exception {
@@ -55,6 +71,13 @@ public class LicenciaServiceImpl implements LicenciaService {
         return licenciaMapper.toDTO(licencia);
     }
 
+        /**
+         * Cambia el estado de una licencia.
+         * @param id identificador de la licencia.
+         * @param inactiveLicenciaDTO datos del nuevo estado.
+         * @return licencia actualizada.
+         * @throws Exception si la licencia no existe.
+         */
     @Override
     @Transactional
     public ResponseLicenciaDTO inactiveLicencia(Long id, InactiveLicenciaDTO inactiveLicenciaDTO) throws Exception {
@@ -65,6 +88,11 @@ public class LicenciaServiceImpl implements LicenciaService {
         return licenciaMapper.toDTO(licencia);
     }
 
+        /**
+         * Obtiene todas las licencias registradas.
+         * @return lista de licencias.
+         * @throws Exception si ocurre un error durante la consulta.
+         */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseLicenciaDTO> getAllLicencias() throws Exception {
@@ -73,6 +101,12 @@ public class LicenciaServiceImpl implements LicenciaService {
                 .collect(Collectors.toList());
     }
 
+        /**
+         * Consulta una licencia por identificador.
+         * @param id identificador de la licencia.
+         * @return licencia encontrada.
+         * @throws Exception si la licencia no existe.
+         */
     @Override
     @Transactional(readOnly = true)
     public ResponseLicenciaDTO getLicenciaById(Long id) throws Exception {
@@ -81,6 +115,12 @@ public class LicenciaServiceImpl implements LicenciaService {
                 .orElseThrow(() -> new NoExisteException("No existe la licencia"));
     }
 
+        /**
+         * Obtiene las licencias asociadas a una empresa.
+         * @param empresaId identificador de la empresa.
+         * @return lista de licencias.
+         * @throws Exception si la empresa no existe.
+         */
     @Override
     @Transactional(readOnly = true)
     public List<ResponseLicenciaDTO> getLicenciasByEmpresa(Long empresaId) throws Exception {

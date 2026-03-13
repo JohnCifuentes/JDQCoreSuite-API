@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uq.com.jdq.coresuite.operacion.campo.Campo;
 
+/**
+ * Entidad que representa una regla de dependencia entre campos.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

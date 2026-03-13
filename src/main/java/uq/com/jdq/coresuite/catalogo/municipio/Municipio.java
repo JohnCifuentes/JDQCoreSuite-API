@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uq.com.jdq.coresuite.catalogo.departamento.Departamento;
 
+/**
+ * Entidad que representa un municipio del catalogo geografico.
+ */
 @Setter
 @Getter
 @NoArgsConstructor

@@ -10,9 +10,18 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 
+/**
+ * Define la estructura y comportamiento de class JWTUtils.
+ */
 @Component
 public class JWTUtils {
 
+    /**
+     * Ejecuta la operacion generateToken.
+     * @param id parametro de entrada.
+     * @param claims parametro de entrada.
+     * @return resultado de la operacion.
+     */
     public String generateToken(String id, Map<String, String> claims) {
         Instant now = Instant.now();
         return Jwts.builder()
@@ -24,11 +33,24 @@ public class JWTUtils {
                 .compact();
     }
 
+    /**
+     * Ejecuta la operacion parseJwt.
+     * @param jwtString parametro de entrada.
+     * @return resultado de la operacion.
+     * @throws ExpiredJwtException en caso de error durante la operacion.
+     * @throws UnsupportedJwtException en caso de error durante la operacion.
+     * @throws MalformedJwtException en caso de error durante la operacion.
+     * @throws IllegalArgumentException en caso de error durante la operacion.
+     */
     public Jws<Claims> parseJwt(String jwtString) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, IllegalArgumentException {
         JwtParser jwtParser = Jwts.parser().verifyWith( getKey() ).build();
         return jwtParser.parseSignedClaims(jwtString);
     }
 
+    /**
+     * Ejecuta la operacion getKey.
+     * @return resultado de la operacion.
+     */
     private SecretKey getKey(){
         String claveSecreta = "secretsecretsecretsecretsecretsecretsecretsecret";
         byte[] secretKeyBytes = claveSecreta.getBytes();
