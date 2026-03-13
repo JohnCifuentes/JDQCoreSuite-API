@@ -59,7 +59,7 @@ public class LoginServiceImp implements LoginService {
                         "LoginServiceImp.login"
                 );
                 authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
-                throw new Exception("El usuario se encuentra bloqueado.");
+                throw new NoExisteException("El usuario se encuentra bloqueado.");
             }
             /**
              *
@@ -71,7 +71,7 @@ public class LoginServiceImp implements LoginService {
                         "LoginServiceImp.login"
                 );
                 authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
-                throw new Exception("El usuario se encuentra inactivo.");
+                throw new NoExisteException("El usuario se encuentra inactivo.");
             }
             /**
              *
@@ -89,7 +89,7 @@ public class LoginServiceImp implements LoginService {
                         "LoginServiceImp.login"
                 );
                 authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
-                throw new Exception("No existe una licencia vigente para esta empresa.");
+                throw new NoExisteException("No existe una licencia vigente para esta empresa.");
             }
             /**
              *
@@ -106,7 +106,7 @@ public class LoginServiceImp implements LoginService {
                         "LoginServiceImp.login"
                 );
                 authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
-                throw new Exception("La cantidad de usuarios en linea supera la cantidad de usuarios contratados.");
+                throw new NoExisteException("La cantidad de usuarios en linea supera la cantidad de usuarios contratados.");
             }
             /**
              *

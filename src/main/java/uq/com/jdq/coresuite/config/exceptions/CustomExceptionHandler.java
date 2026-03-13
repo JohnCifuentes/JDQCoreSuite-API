@@ -1,6 +1,7 @@
 package uq.com.jdq.coresuite.config.exceptions;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import uq.com.jdq.coresuite.config.RespuestaDTO;
@@ -29,6 +30,16 @@ public class CustomExceptionHandler {
     @ExceptionHandler(value = NoExisteException.class)
     public ResponseEntity<RespuestaDTO<String>> validarNoExisteException(NoExisteException e){
         return ResponseEntity.status(404).body(new RespuestaDTO<>(false, e.getMessage()));
+    }
+
+    /**
+     * Ejecuta la operacion validarBadCredentials.
+     * @param e parametro de entrada.
+     * @return resultado de la operacion.
+     */
+    @ExceptionHandler(value = BadCredentialsException.class)
+    public ResponseEntity<RespuestaDTO<String>> validarBadCredentials(BadCredentialsException e){
+        return ResponseEntity.status(401).body(new RespuestaDTO<>(false, e.getMessage()));
     }
 
     /**
