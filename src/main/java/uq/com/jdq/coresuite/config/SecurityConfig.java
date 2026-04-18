@@ -51,6 +51,7 @@ public class SecurityConfig {
                 ).permitAll()
                 // SOLO POST pÃºblico para empresa
                 .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/login/2FA").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/sistema/empresa").permitAll()
                 .requestMatchers("/api/catalogo/**").permitAll()
                 .requestMatchers("/api/seguridad/codigo/**").permitAll()

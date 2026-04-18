@@ -1,6 +1,7 @@
 package uq.com.jdq.coresuite.sistema.empresa;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uq.com.jdq.coresuite.catalogo.departamento.Departamento;
@@ -25,7 +26,6 @@ import uq.com.jdq.coresuite.seguridad.usuario.ResponseUsuarioDTO;
 import uq.com.jdq.coresuite.seguridad.usuario.UsuarioServiceImpl;
 import uq.com.jdq.coresuite.sistema.licencia.CreateLicenciaDTO;
 import uq.com.jdq.coresuite.sistema.licencia.LicenciaServiceImpl;
-import uq.com.jdq.coresuite.sistema.sesion.SesionServiceImpl;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -63,67 +63,104 @@ public class EmpresaServiceImpl implements EmpresaService {
         Pais pais = paisServiceImp.getPais(createEmpresaDTO.paisId());
         Departamento departamento = departamentoServicioImp.getDepartamento(createEmpresaDTO.departamentoId());
         Municipio municipio = municipioServiceImp.getMunicipio(createEmpresaDTO.municipioId());
-        /**
+        /*
          * Validaciones
          */
         if (empresaRepository.findByTipoIdentificacionAndNumeroIdentificacion(tipoIdentificacion, createEmpresaDTO.numeroIdentificacion()).isPresent()) {
-            throw new RegistroRepetidoException("Ya existe una empresa registrada con este tipo y nÃºmero de identificaciÃ³n");
+            throw new RegistroRepetidoException("Ya existe una empresa registrada con este tipo y número de identificación");
         }
         /**/
         if (empresaRepository.findByCorreoElectronico(createEmpresaDTO.correoElectronico()).isPresent()) {
             throw new RegistroRepetidoException("Ya existe una empresa registrada con este correo electronico");
         }
-        /**
-         *
-         */
         Empresa empresa = empresaMapper.toEntity(createEmpresaDTO);
         empresa.setTipoIdentificacion(tipoIdentificacion);
         empresa.setPais(pais);
         empresa.setDepartamento(departamento);
         empresa.setMunicipio(municipio);
         empresa = empresaRepository.save(empresa);
-        /**
+        /*
          * Crear ROL/ADMIN
          */
         CreateRolDTO rolDTO = new CreateRolDTO(empresa.getId(), "ADMIN", "ROLE_ADMIN");
         ResponseRolDTO rol = rolService.createRol(rolDTO);
-        /**
+        /*
          * Crear Usuario/ADMIN
          */
         CreateUsuarioDTO usuarioDTO = new CreateUsuarioDTO(empresa.getId(), empresa.getTipoIdentificacion().getId(), empresa.getNumeroIdentificacion(),
                 empresa.getRazonSocial(), null, "ADMIN", null, empresa.getTelefono(), empresa.getCorreoElectronico());
         ResponseUsuarioDTO usuario = usuarioService.createUsuario(usuarioDTO);
-        /**
+        /*
          * Asignar RolUsuario/ADMIN
          */
         CreateRolUsuarioDTO rolUsuarioDTO = new CreateRolUsuarioDTO(empresa.getId(), rol.id(), usuario.id());
         rolUsuarioService.createRolUsuario(rolUsuarioDTO);
-        /**
+        /*
          *
          */
-        CreateLicenciaDTO licenciaDTO = new CreateLicenciaDTO(empresa.getId(), 2L, LocalDate.now(), LocalDate.now().plusMonths(3), true);
+        CreateLicenciaDTO licenciaDTO = new CreateLicenciaDTO(empresa.getId(), 10L, LocalDate.now(), LocalDate.now().plusMonths(3), true);
         licenciaService.createLicencia(licenciaDTO);
-        /**
-         * NotificaciÃ³n vÃ­a email
-         */
-        String cuerpo = """
-        Hola %s,
-        
-        Â¡Bienvenido a JDQ - CoreSuite!
-        
-        Su empresa ha sido registrada exitosamente en nuestra plataforma.
-        
-        Puede acceder al sistema desde el siguiente enlace:
-        https://jdq-coresuite-app.web.app/
- 
-        Atentamente,
-        Equipo JDQ - CoreSuite
-        """.formatted(
-                empresa.getRazonSocial()
-        );
-        EmailDTO emailDTO = new EmailDTO("Bienvenido a JDQ - CoreSuite", cuerpo, usuario.correoElectronico());
+        EmailDTO emailDTO = getEmailDTO(empresa, usuario);
         notificacionService.enviarNotificacion(emailDTO);
         return empresaMapper.toDTO(empresa);
+    }
+
+    private static @NotNull EmailDTO getEmailDTO(Empresa empresa, ResponseUsuarioDTO usuario) {
+        String cuerpo = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+        </head>
+        <body style="margin:0; padding:0; background-color:#f4f6f8; font-family: Arial, sans-serif;">
+          <table width="100%%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8; padding:20px 0;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:8px; overflow:hidden;">
+                  <!-- Header -->
+                  <tr>
+                    <td style="background-color:#1f3c88; padding:20px; text-align:center; color:white; font-size:20px; font-weight:bold;">
+                      JDQ - CoreSuite
+                    </td>
+                  </tr>
+                  <!-- Body -->
+                  <tr>
+                    <td style="padding:30px; color:#333333; font-size:14px; line-height:1.6;">
+                      <p>Hola <strong>%s</strong>,</p>
+                      <p>
+                        ¡Bienvenido a <strong>JDQ - CoreSuite</strong>!
+                      </p>
+                      <p>
+                        Su empresa ha sido registrada exitosamente en nuestra plataforma.
+                      </p>
+                      <p style="text-align:center; margin:30px 0;">
+                        <a href="https://jdq-coresuite-app.web.app/"
+                           style="background-color:#1f3c88; color:#ffffff; padding:12px 20px; text-decoration:none; border-radius:5px; display:inline-block;">
+                           Acceder al sistema
+                        </a>
+                      </p>
+                      <p>
+                        Si tiene alguna duda, no dude en contactarnos.
+                      </p>
+                      <p>Atentamente,<br>
+                        <strong>Equipo JDQ - CoreSuite</strong>
+                      </p>
+                    </td>
+                  </tr>
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color:#f1f1f1; text-align:center; padding:15px; font-size:12px; color:#777;">
+                      © 2026 JDQ - CoreSuite. Todos los derechos reservados.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        """.formatted(empresa.getRazonSocial());
+        return new EmailDTO("Bienvenido a JDQ - CoreSuite", cuerpo, usuario.correoElectronico());
     }
 
     /**
@@ -142,11 +179,11 @@ public class EmpresaServiceImpl implements EmpresaService {
         Municipio municipio = municipioServiceImp.getMunicipio(updateEmpresaDTO.municipioId());
         Empresa empresa = empresaRepository.findById(id)
                 .orElseThrow(() -> new NoExisteException("No existe la empresa"));
-        /**
+        /*
          * Validaciones
          */
         if (empresaRepository.findByTipoIdentificacionAndNumeroIdentificacionAndIdNot(tipoIdentificacion, updateEmpresaDTO.numeroIdentificacion(), empresa.getId()).isPresent()) {
-            throw new RegistroRepetidoException("Ya existe una empresa registrada con este tipo y nÃºmero de identificaciÃ³n");
+            throw new RegistroRepetidoException("Ya existe una empresa registrada con este tipo y número de identificación");
         }
         /**/
         if (empresaRepository.findByCorreoElectronicoAndIdNot(updateEmpresaDTO.correoElectronico(), empresa.getId()).isPresent()) {
@@ -181,11 +218,10 @@ public class EmpresaServiceImpl implements EmpresaService {
     /**
      * Obtiene todas las empresas registradas.
      * @return lista de empresas.
-     * @throws Exception si ocurre un error durante la consulta.
      */
     @Override
     @Transactional(readOnly = true)
-    public List<ResponseEmpresaDTO> getAllEmpresas() throws Exception {
+    public List<ResponseEmpresaDTO> getAllEmpresas() {
         return empresaRepository.findAll().stream()
                 .map(empresaMapper::toDTO)
                 .collect(Collectors.toList());

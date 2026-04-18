@@ -15,7 +15,6 @@ import uq.com.jdq.coresuite.infra.autenticationevents.AuthenticationEventsServic
 import uq.com.jdq.coresuite.infra.authenticationeventstype.AuthenticationEventsTypeService;
 import uq.com.jdq.coresuite.notificacion.EmailDTO;
 import uq.com.jdq.coresuite.notificacion.NotificacionService;
-import uq.com.jdq.coresuite.seguridad.rolusuario.RolUsuarioService;
 import uq.com.jdq.coresuite.sistema.empresa.Empresa;
 import uq.com.jdq.coresuite.sistema.empresa.EmpresaRepository;
 
@@ -38,7 +37,6 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final AuthenticationEventsService authenticationEventsService;
     private final AuthenticationEventsTypeService authenticationEventsTypeService;
     private final NotificacionService notificacionService;
-    private final RolUsuarioService rolUsuarioService;
 
     /**
      * Registra un nuevo usuario validando empresa, tipo de identificacion y unicidad del correo.
@@ -49,35 +47,13 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public ResponseUsuarioDTO createUsuario(CreateUsuarioDTO createUsuarioDTO) throws Exception {
+        existeCorreoElectronico(createUsuarioDTO.correoElectronico());
         Usuario usuario = usuarioMapper.toEntity(createUsuarioDTO);
-        /**
-         *
-         */
-        Optional<Empresa> empresa = empresaRepository.findById(createUsuarioDTO.empresaId());
-        if(empresa.isEmpty()) {
-            throw new NoExisteException("No existe la empresa");
-        }
-        /**
-         *
-         */
-        Optional<TipoIdentificacion> tipoIdentificacion = tipoIdentificacionRepository.findById(createUsuarioDTO.tipoIdentificacionId());
-        if(tipoIdentificacion.isEmpty()) {
-            throw new NoExisteException("No existe un tipo de identificacion");
-        }
-        /**
-         *
-         */
-        if(this.getUsuarioByCorreoElectronico(createUsuarioDTO.correoElectronico()).isPresent()){
-            throw new RegistroRepetidoException("El correo electronico ya existe");
-        }
-        /**
-         *
-         */
-        usuario.setEmpresa(empresa.get());
-        usuario.setTipoIdentificacion(tipoIdentificacion.get());
+        usuario.setEmpresa(getEmpresa(createUsuarioDTO.empresaId()));
+        usuario.setTipoIdentificacion(getTipoIdentificacion(createUsuarioDTO.tipoIdentificacionId()));
         usuario.setPassword(passwordEncoder.encode(createUsuarioDTO.numeroIdentificacion()));
         usuario = usuarioRepository.save(usuario);
-        notificacionService.enviarNotificacion(getEmailDTO(usuario));
+        notificacionService.enviarNotificacion(getWelcomeEmailDTO(usuario));
         return usuarioMapper.toDTO(usuario);
     }
 
@@ -91,34 +67,14 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public ResponseUsuarioDTO updateUsuario(Long id, UpdateUsuarioDTO updateUsuarioDTO) throws Exception {
-        Optional<Empresa> empresa = empresaRepository.findById(updateUsuarioDTO.empresaId());
-        if(empresa.isEmpty()) {
-            throw new NoExisteException("No existe la empresa");
-        }
-        /**
-         *
-         */
-        Optional<TipoIdentificacion> tipoIdentificacion = tipoIdentificacionRepository.findById(updateUsuarioDTO.tipoIdentificacionId());
-        if(tipoIdentificacion.isEmpty()) {
-            throw new NoExisteException("No existe un tipo de identificacion");
-        }
-        /**
-         *
-         */
-        if(this.getUsuarioByCorreoElectronico(updateUsuarioDTO.correoElectronico()).isPresent()){
-            throw new RegistroRepetidoException("El correo electronico ya existe");
-        }
-        /**
-         *
-         */
         Optional<Usuario> usuario = usuarioRepository.findById(id);
         if(usuario.isEmpty()) {
             throw new NoExisteException("No existe un usuario");
         }
         Usuario usuarioAux = usuario.get();
         usuarioMapper.updateEntityFromDTO(updateUsuarioDTO, usuarioAux);
-        usuarioAux.setEmpresa(empresa.get());
-        usuarioAux.setTipoIdentificacion(tipoIdentificacion.get());
+        usuarioAux.setEmpresa(getEmpresa(updateUsuarioDTO.empresaId()));
+        usuarioAux.setTipoIdentificacion(getTipoIdentificacion(updateUsuarioDTO.tipoIdentificacionId()));
         usuarioAux = usuarioRepository.save(usuarioAux);
         return usuarioMapper.toDTO(usuarioAux);
     }
@@ -269,7 +225,7 @@ public class UsuarioServiceImpl implements UsuarioService {
                     "LoginServiceImp.login"
             );
             authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
-            notificacionService.enviarNotificacion(getEmailDTO(usuarioAux));
+            notificacionService.enviarNotificacion(getBlockEmailDTO(usuarioAux));
             return usuarioMapper.toDTO(usuarioAux);
         } else {
             throw new NoExisteException("No existe el usuario");
@@ -323,33 +279,83 @@ public class UsuarioServiceImpl implements UsuarioService {
      * @param usuario usuario destinatario.
      * @return mensaje listo para enviar.
      */
-    private static @NotNull EmailDTO getEmailDTO(Usuario usuario) {
+    private @NotNull EmailDTO getWelcomeEmailDTO(Usuario usuario) {
         String cuerpo = """
-        Hola %s,
-        
-        Â¡Bienvenido a JDQ - CoreSuite!
-        
-        Su usuario ha sido registrado exitosamente en nuestra plataforma.
-        
-        A continuaciÃ³n encontrarÃ¡ sus credenciales de acceso inicial:
-        
-        Usuario: %s
-        ContraseÃ±a: %s
-        
-        Puede acceder al sistema desde el siguiente enlace:
-        https://jdq-coresuite-app.web.app/
-        
-        Por razones de seguridad, le recomendamos cambiar su contraseÃ±a despuÃ©s de iniciar sesiÃ³n por primera vez.
- 
-        Atentamente,
-        Equipo JDQ - CoreSuite
-        """.formatted(
-                (usuario.getNombre1() + ' ' + usuario.getApellido1()),
-                usuario.getCorreoElectronico(),
-                usuario.getNumeroIdentificacion()
+		<!DOCTYPE html>
+		<html>
+		<head>
+		  <meta charset="UTF-8">
+		</head>
+		<body style="margin:0; padding:0; background-color:#f4f6f8; font-family: Arial, sans-serif;">
+		  <table width="100%%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8; padding:20px 0;">
+			<tr>
+			  <td align="center">
+				<table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:8px; overflow:hidden;">
+				  <!-- Header -->
+				  <tr>
+					<td style="background-color:#1f3c88; padding:20px; text-align:center; color:white; font-size:20px; font-weight:bold;">
+					  JDQ - CoreSuite
+					</td>
+				  </tr>
+				  <!-- Body -->
+				  <tr>
+					<td style="padding:30px; color:#333333; font-size:14px; line-height:1.6;">
+					  <p>Hola <strong>%s</strong>,</p>
+					  <p>
+						¡Bienvenido a <strong>JDQ - CoreSuite</strong>!
+					  </p>
+					  <p>
+						Su usuario ha sido registrado exitosamente en nuestra plataforma.
+					  </p>
+					  <!-- Credenciales -->
+					  <table width="100%%" cellpadding="0" cellspacing="0" style="background-color:#f1f5fb; border-radius:6px; margin:20px 0; padding:15px;">
+						<tr>
+						  <td style="font-size:14px; color:#333;">
+							<strong>Usuario:</strong><br>
+							%s
+						  </td>
+						</tr>
+						<tr>
+						  <td style="padding-top:10px; font-size:14px; color:#333;">
+							<strong>Contraseña:</strong><br>
+							%s
+						  </td>
+						</tr>
+					  </table>
+					  <p style="text-align:center; margin:30px 0;">
+						<a href="https://jdq-coresuite-app.web.app/" 
+						   style="background-color:#1f3c88; color:#ffffff; padding:12px 20px; text-decoration:none; border-radius:5px; display:inline-block;">
+						   Acceder al sistema
+						</a>
+					  </p>
+					  <!-- Seguridad -->
+					  <p style="background-color:#fff4e5; padding:12px; border-radius:6px; font-size:13px; color:#8a6d3b;">
+						Por razones de seguridad, le recomendamos cambiar su contraseña después de iniciar sesión por primera vez.
+					  </p>
+					  <p>
+						Atentamente,<br>
+						<strong>Equipo JDQ - CoreSuite</strong>
+					  </p>
+					</td>
+				  </tr>
+				  <!-- Footer -->
+				  <tr>
+					<td style="background-color:#f1f1f1; text-align:center; padding:15px; font-size:12px; color:#777;">
+					  © 2026 JDQ - CoreSuite. Todos los derechos reservados.
+					</td>
+				  </tr>
+				</table>
+			  </td>
+			</tr>
+		  </table>
+		</body>
+		</html>
+		""".formatted(
+            (usuario.getNombre1() + " " + usuario.getApellido1()),
+            usuario.getCorreoElectronico(),
+            usuario.getNumeroIdentificacion()
         );
-        EmailDTO emailDTO = new EmailDTO("Bienvenido a JDQ - CoreSuite", cuerpo, usuario.getCorreoElectronico());
-        return emailDTO;
+        return new EmailDTO("Bienvenido a JDQ - CoreSuite", cuerpo, usuario.getCorreoElectronico());
     }
 
     /**
@@ -357,32 +363,122 @@ public class UsuarioServiceImpl implements UsuarioService {
      * @param usuario usuario bloqueado.
      * @return mensaje listo para enviar.
      */
-    private static @NotNull EmailDTO getEmailDTOBlock(Usuario usuario) {
+    private @NotNull EmailDTO getBlockEmailDTO(Usuario usuario) {
         String cuerpo = """
-            Se ha recibido una solicitud de desbloqueo de cuenta en JDQ - CoreSuite.
-
-            El usuario ha sido bloqueado debido a mÃºltiples intentos fallidos de inicio de sesiÃ³n.
-
-            InformaciÃ³n del usuario:
-
-            Tipo de identificaciÃ³n: %s
-            NÃºmero de identificaciÃ³n: %s
-            Nombre: %s
-            Correo electrÃ³nico: %s
-
-            Por favor verifique la informaciÃ³n y, si corresponde, proceda con el desbloqueo de la cuenta desde el panel administrativo.
-
-            Este mensaje fue generado automÃ¡ticamente por el sistema.
-
-            JDQ - CoreSuite
-            """.formatted(
-                usuario.getTipoIdentificacion().getCodigo(),
-                usuario.getNumeroIdentificacion(),
-                usuario.getNombre1() + ' ' + usuario.getApellido1(),
-                usuario.getCorreoElectronico()
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+        </head>
+        <body style="margin:0; padding:0; background-color:#f4f6f8; font-family: Arial, sans-serif;">
+          <table width="100%%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8; padding:20px 0;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:8px; overflow:hidden;">
+                  <tr>
+                    <td style="background-color:#1f3c88; padding:20px; text-align:center; color:white; font-size:20px; font-weight:bold;">
+                      JDQ - CoreSuite
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:30px; color:#333333; font-size:14px; line-height:1.6;">
+                      <p><strong>Notificación de cuenta bloqueada</strong></p>
+                      <p>Le informamos que un usuario ha sido bloqueado en <strong>JDQ - CoreSuite</strong> debido a múltiples intentos fallidos de inicio de sesión.</p>
+                      <table width="100%%" cellpadding="0" cellspacing="0" style="background-color:#f1f5fb; border-radius:6px; margin:20px 0; padding:15px;">
+                        <tr>
+                          <td style="font-size:14px; color:#333;">
+                            <strong>Tipo de identificación:</strong><br>
+                            %s
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding-top:10px; font-size:14px; color:#333;">
+                            <strong>Número de identificación:</strong><br>
+                            %s
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding-top:10px; font-size:14px; color:#333;">
+                            <strong>Nombre:</strong><br>
+                            %s
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding-top:10px; font-size:14px; color:#333;">
+                            <strong>Correo electrónico:</strong><br>
+                            %s
+                          </td>
+                        </tr>
+                      </table>
+                      <p style="background-color:#fdecea; padding:12px; border-radius:6px; font-size:13px; color:#a94442;">
+                        Este bloqueo se realizó automáticamente como medida de seguridad.
+                      </p>
+                      <p style="font-size:12px; color:#777;">
+                        Este mensaje es únicamente informativo. La gestión del desbloqueo debe realizarse a través de los canales administrativos correspondientes.
+                      </p>
+                      <p>
+                        Atentamente,<br>
+                        <strong>JDQ - CoreSuite</strong>
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="background-color:#f1f1f1; text-align:center; padding:15px; font-size:12px; color:#777;">
+                      © 2026 JDQ - CoreSuite. Todos los derechos reservados.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        """.formatted(
+            usuario.getTipoIdentificacion().getCodigo(),
+            usuario.getNumeroIdentificacion(),
+            usuario.getNombre1() + " " + usuario.getApellido1(),
+            usuario.getCorreoElectronico()
         );
-        EmailDTO emailDTO = new EmailDTO("Acceso bloqueado", cuerpo, usuario.getEmpresa().getCorreoElectronico());
-        return emailDTO;
+        return new EmailDTO("Acceso bloqueado", cuerpo, usuario.getEmpresa().getCorreoElectronico());
+    }
+
+    /**
+     * Valida que la empresa exista
+     * @param empresaId Consecutivo de la empresa
+     * @return Empresa
+     * @throws Exception si ocurre un error de negocio.
+     */
+    private Empresa getEmpresa(Long empresaId) throws Exception {
+        Optional<Empresa> empresa = empresaRepository.findById(empresaId);
+        if(empresa.isEmpty()) {
+            throw new NoExisteException("No existe la empresa");
+        }
+        return empresa.get();
+    }
+
+    /**
+     * Valida si el tipo de identificacion exista
+     * @param tipoIdentificacionId Consecutivo del tipo de identifcacion
+     * @return TipoIdentificacion
+     * @throws Exception si ocurre un error de negocio.
+     */
+    private TipoIdentificacion getTipoIdentificacion(Long tipoIdentificacionId) throws Exception {
+        Optional<TipoIdentificacion> tipoIdentificacion = tipoIdentificacionRepository.findById(tipoIdentificacionId);
+        if(tipoIdentificacion.isEmpty()) {
+            throw new NoExisteException("No existe un tipo de identificacion");
+        }
+        return tipoIdentificacion.get();
+    }
+
+    /**
+     * Valida si ya existe un correo electrónico
+     * @param correoElectronico correoElectronico
+     * @throws Exception si ocurre un error de negocio.
+     */
+    private void existeCorreoElectronico(String correoElectronico) throws Exception {
+        if(this.getUsuarioByCorreoElectronico(correoElectronico).isPresent()){
+            throw new RegistroRepetidoException("El correo electronico ya existe");
+        }
     }
 
 }

@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uq.com.jdq.coresuite.config.RespuestaDTO;
 import uq.com.jdq.coresuite.config.TokenDTO;
+import uq.com.jdq.coresuite.seguridad.codigo.ConfirmarUsuarioCodigoDTO;
 
 /**
  * Controlador REST para autenticacion y cierre de sesion de usuarios.
@@ -22,8 +23,13 @@ public class LoginController {
      * @throws Exception si ocurre un error durante el inicio de sesion.
      */
     @PostMapping
-    public ResponseEntity<RespuestaDTO<TokenDTO>> login(@RequestBody LoginDTO loginDTO) throws Exception {
+    public ResponseEntity<RespuestaDTO<String>> login(@RequestBody LoginDTO loginDTO) throws Exception {
         return ResponseEntity.ok(new RespuestaDTO<>(false, this.loginService.login(loginDTO)));
+    }
+
+    @PostMapping("/2FA")
+    public ResponseEntity<RespuestaDTO<TokenDTO>> login2FA(@RequestBody ConfirmarUsuarioCodigoDTO usuarioCodigoDTO) throws Exception {
+        return ResponseEntity.ok(new RespuestaDTO<>(false, this.loginService.login2FA(usuarioCodigoDTO)));
     }
 
     /**

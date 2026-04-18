@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/config/AutenticacionEntryPoint.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/config/RespuestaDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/config/exceptions/ReglasCodigoException.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/infra/autenticationevents/AuthenticationEventsController.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/campo/CreateCampoDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/campo/UpdateCampoDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/campo_dependencia/CreateCampoDependenciaDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/campo_dependencia/UpdateCampoDependenciaDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/campo_validacion/CreateCampoValidacionDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/campo_validacion/UpdateCampoValidacionDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/interface_grupo_campos/CreateInterfaceGrupoCamposDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/interface_grupo_campos/UpdateInterfaceGrupoCamposDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/interfaz/CreateInterfazDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/interfaz/UpdateInterfazDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/lista_valores_detalle/CreateListaValoresDetalleDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/tipo_campo/CreateTipoCampoDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/tipo_validacion/CreateTipoValidacionDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/operacion/tipo_validacion/UpdateTipoValidacionDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/seguridad/codigo/CodigoService.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/sistema/sesion/CreateSesionDTO.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/sistema/sesion/ResponseSesionDTO.java" charset="Big5" />
+    <file url="file://$PROJECT_DIR$/src/main/java/uq/com/jdq/coresuite/sistema/sesion/UpdateSesionDTO.java" charset="UTF-8" />
+  </component>
+</project>

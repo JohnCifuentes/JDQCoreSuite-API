@@ -18,7 +18,7 @@ public class CodigoController {
     private final CodigoService codigoService;
 
     /**
-     * Genera un nuevo codigo de verificacion para un usuario.
+     * Genera un nuevo codigo de verificacion para un usuario durante el proceso de Olvide Contraseña
      * @param codigoDTO datos necesarios para generar el codigo.
      * @return respuesta con el resultado de la generacion.
      * @throws Exception si ocurre un error durante el proceso.
@@ -26,7 +26,18 @@ public class CodigoController {
     @PostMapping("/generar")
     public ResponseEntity<RespuestaDTO<String>> generate(@RequestBody CreateCodigoDTO codigoDTO) throws Exception{
         return ResponseEntity.ok(new RespuestaDTO<>(false, this.codigoService.generate(codigoDTO)));
-    };
+    }
+
+    /**
+     * Genera un nuevo codigo de verificacion para un usuario durante el proceso de Login (DobleAutenticación)
+     * @param codigoDTO datos necesarios para generar el codigo.
+     * @return respuesta con el resultado de la generacion.
+     * @throws Exception si ocurre un error durante el proceso.
+     */
+    @PostMapping("/generar/2FA")
+    public ResponseEntity<RespuestaDTO<String>> generate2FA(@RequestBody CreateCodigoDTO codigoDTO) throws Exception{
+        return ResponseEntity.ok(new RespuestaDTO<>(false, this.codigoService.generate(codigoDTO)));
+    }
 
     /**
      * Confirma un codigo de verificacion previamente generado.
@@ -37,6 +48,6 @@ public class CodigoController {
     @PostMapping("/confirmar")
     public ResponseEntity<RespuestaDTO<String>> confirmarCodigo(@RequestBody ConfirmarUsuarioCodigoDTO codigoDTO) throws Exception{
         return ResponseEntity.ok(new RespuestaDTO<>(false, this.codigoService.confirmarCodigo(codigoDTO)));
-    };
+    }
 
 }

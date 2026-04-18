@@ -31,39 +31,139 @@ public class CodigoServiceImpl implements CodigoService {
      */
     @Override
     public String generate(CreateCodigoDTO codigoDTO) throws Exception {
-        Optional<Usuario> usuario = usuarioService.getUsuarioByCorreoElectronico(codigoDTO.correoElectronico());
-        if(usuario.isEmpty()) {
-            throw new NoExisteException("Correo electrÃ³nico no encontrado");
-        }
+        Usuario usuario = getUsuarioByCorreoElectronico(codigoDTO.correoElectronico());
         Codigo codigo = new Codigo();
-        codigo.setUsuario(usuario.get());
+        codigo.setUsuario(usuario);
         codigo.setCodigo(generarCodigoAleatorio());
         codigoRepository.save(codigo);
-        /**
-         *
-         */
         String cuerpo = """
-        Hola,
-        
-        Hemos recibido una solicitud para restablecer la contraseÃ±a de su cuenta en JDQ - CoreSuite.
-        
-        Utilice el siguiente cÃ³digo para continuar con el proceso de restablecimiento de contraseÃ±a:
-        
-        CÃ³digo de verificaciÃ³n: %s
-        
-        Este cÃ³digo expirarÃ¡ en %s minutos.
-        
-        Si usted no solicitÃ³ este cambio, puede ignorar este correo. Su contraseÃ±a actual permanecerÃ¡ sin cambios.
-        
-        Por seguridad, no comparta este cÃ³digo con nadie.
-        
-        Atentamente,
-        Equipo JDQ - CoreSuite
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+        </head>
+        <body style="margin:0; padding:0; background-color:#f4f6f8; font-family: Arial, sans-serif;">
+          <table width="100%%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8; padding:20px 0;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:8px; overflow:hidden;">
+                  <tr>
+                    <td style="background-color:#1f3c88; padding:20px; text-align:center; color:white; font-size:20px; font-weight:bold;">
+                      JDQ - CoreSuite
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:30px; color:#333333; font-size:14px; line-height:1.6;">
+                      <p>Hola,</p>
+                      <p>Hemos recibido una solicitud para restablecer la contraseña de su cuenta en <strong>JDQ - CoreSuite</strong>.</p>
+                      <p>Utilice el siguiente código para continuar con el proceso de restablecimiento de contraseña:</p>
+                      <table width="100%%" cellpadding="0" cellspacing="0" style="margin:25px 0; text-align:center;">
+                        <tr>
+                          <td style="background-color:#1f3c88; color:#ffffff; font-size:22px; font-weight:bold; padding:15px; border-radius:6px; letter-spacing:2px;">
+                            %s
+                          </td>
+                        </tr>
+                      </table>
+                      <p style="text-align:center; font-size:13px; color:#777;">
+                        Este código expirará en <strong>%s minutos</strong>.
+                      </p>
+                      <p style="background-color:#fdecea; padding:12px; border-radius:6px; font-size:13px; color:#a94442;">
+                        Si usted no solicitó este cambio, puede ignorar este correo. Su contraseña actual permanecerá sin cambios.
+                      </p>
+                      <p style="background-color:#fff4e5; padding:12px; border-radius:6px; font-size:13px; color:#8a6d3b;">
+                        Por seguridad, no comparta este código con nadie.
+                      </p>
+                      <p>
+                        Atentamente,<br>
+                        <strong>Equipo JDQ - CoreSuite</strong>
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="background-color:#f1f1f1; text-align:center; padding:15px; font-size:12px; color:#777;">
+                      © 2026 JDQ - CoreSuite. Todos los derechos reservados.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
         """.formatted(codigo.getCodigo(), 15);
-        EmailDTO emailDTO = new EmailDTO("Olvide mi contraseÃ±a JDQ - CoreSuite", cuerpo, usuario.get().getCorreoElectronico());
+        EmailDTO emailDTO = new EmailDTO("Olvide mi contraseña JDQ - CoreSuite", cuerpo, usuario.getCorreoElectronico());
         notificacionService.enviarNotificacion(emailDTO);
         return "Codigo generado correctamente";
     }
+
+    @Override
+    public String generate2FA(CreateCodigoDTO codigoDTO) throws Exception {
+        Usuario usuario = getUsuarioByCorreoElectronico(codigoDTO.correoElectronico());
+        Codigo codigo = new Codigo();
+        codigo.setUsuario(usuario);
+        codigo.setCodigo(generarCodigoAleatorio());
+        codigoRepository.save(codigo);
+        String cuerpo = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+        </head>
+        <body style="margin:0; padding:0; background-color:#f4f6f8; font-family: Arial, sans-serif;">
+          <table width="100%%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8; padding:20px 0;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:8px; overflow:hidden;">
+                  <tr>
+                    <td style="background-color:#1f3c88; padding:20px; text-align:center; color:white; font-size:20px; font-weight:bold;">
+                      JDQ - CoreSuite
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:30px; color:#333333; font-size:14px; line-height:1.6;">
+                      <p>Hola,</p>
+                      <p>Hemos detectado un intento de inicio de sesión en su cuenta de <strong>JDQ - CoreSuite</strong>.</p>
+                      <p>Para completar el acceso, ingrese el siguiente código de verificación:</p>
+                      <table width="100%%" cellpadding="0" cellspacing="0" style="margin:25px 0; text-align:center;">
+                        <tr>
+                          <td style="background-color:#1f3c88; color:#ffffff; font-size:22px; font-weight:bold; padding:15px; border-radius:6px; letter-spacing:2px;">
+                            %s
+                          </td>
+                        </tr>
+                      </table>
+                      <p style="text-align:center; font-size:13px; color:#777;">
+                        Este código es válido por <strong>%s minutos</strong>.
+                      </p>
+                      <p>Si usted está intentando iniciar sesión, introduzca este código en la aplicación para continuar.</p>
+                      <p style="background-color:#fdecea; padding:12px; border-radius:6px; font-size:13px; color:#a94442;">
+                        Si no reconoce este intento, le recomendamos cambiar su contraseña inmediatamente y contactar con el equipo de soporte.
+                      </p>
+                      <p style="background-color:#fff4e5; padding:12px; border-radius:6px; font-size:13px; color:#8a6d3b;">
+                        Por seguridad, no comparta este código con nadie.
+                      </p>
+                      <p>
+                        Atentamente,<br>
+                        <strong>Equipo JDQ - CoreSuite</strong>
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="background-color:#f1f1f1; text-align:center; padding:15px; font-size:12px; color:#777;">
+                      © 2026 JDQ - CoreSuite. Todos los derechos reservados.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        """.formatted(codigo.getCodigo(), 15);
+        EmailDTO emailDTO = new EmailDTO("Tu código de verificación - JDQ CoreSuite", cuerpo, usuario.getCorreoElectronico());
+        notificacionService.enviarNotificacion(emailDTO);
+        return "Codigo generado correctamente";
+    }
+
 
     /**
      * Confirma un codigo de verificacion vigente para un usuario.
@@ -73,24 +173,21 @@ public class CodigoServiceImpl implements CodigoService {
      */
     @Override
     public String confirmarCodigo(ConfirmarUsuarioCodigoDTO codigoDTO) throws Exception {
-        Optional<Usuario> usuario = usuarioService.getUsuarioByCorreoElectronico(codigoDTO.correoElectronico());
-        if(usuario.isEmpty()) {
-            throw new NoExisteException("Correo electrÃ³nico no encontrado");
-        }
-        Optional<Codigo> codigo = codigoRepository.findTopByUsuarioIdOrderByFechaGeneracionDesc(usuario.get().getId());
+        Usuario usuario = getUsuarioByCorreoElectronico(codigoDTO.correoElectronico());
+        Optional<Codigo> codigo = codigoRepository.findTopByUsuarioIdOrderByFechaGeneracionDesc(usuario.getId());
         if(codigo.isPresent()){
             Codigo codigoAux = codigo.get();
             if(codigoAux.getFechaGeneracion().plusMinutes(15).isBefore(LocalDateTime.now())){
-                throw new ReglasCodigoException("El cÃ³digo de confimaciÃ³n ha expirado. Solicite uno nuevamente");
+                throw new ReglasCodigoException("El código de confimación ha expirado. Solicite uno nuevamente");
             }
             if(!codigoAux.getEstado().equals("A")){
-                throw new ReglasCodigoException("El cÃ³digo de confirmaciÃ³n ya fue usado. Solicite uno nuevamente");
+                throw new ReglasCodigoException("El código de confirmación ya fue usado. Solicite uno nuevamente");
             }
             codigoAux.setEstado("I");
             codigoRepository.save(codigoAux);
-            return "CÃ³digo confirmado correctamente";
+            return "Código confirmado correctamente";
         } else {
-            throw new NoExisteException("No se ha generado un cÃ³digo de confirmaciÃ³n para este usuario");
+            throw new NoExisteException("No se ha generado un código de confirmación para este usuario");
         }
     }
 
@@ -106,6 +203,20 @@ public class CodigoServiceImpl implements CodigoService {
             codigo.append(digitos.charAt(indice));
         }
         return codigo.toString();
+    }
+
+    /**
+     * Se obtiene el usuario dado el correo electrónico
+     * @param correoElectronico correo electrónico del usuario
+     * @return usuario dado el correo electrónico
+     * @throws Exception si ocurre un error durante la validacion.
+     */
+    public Usuario getUsuarioByCorreoElectronico(String correoElectronico) throws Exception {
+        Optional<Usuario> usuario = usuarioService.getUsuarioByCorreoElectronico(correoElectronico);
+        if(usuario.isEmpty()) {
+            throw new NoExisteException("Correo electrónico no encontrado");
+        }
+        return usuario.get();
     }
 
 }

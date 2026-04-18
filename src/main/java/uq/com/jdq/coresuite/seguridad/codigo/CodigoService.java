@@ -6,12 +6,20 @@ package uq.com.jdq.coresuite.seguridad.codigo;
 public interface CodigoService {
 
     /**
-     * Genera un nuevo codigo de verificacion.
+     * Genera un nuevo codigo de verificacion durante el proceso de Olvide Contraseña
      * @param codigoDTO datos del usuario destinatario.
      * @return mensaje con el resultado de la operacion.
      * @throws Exception si ocurre un error durante la generacion.
      */
     String generate(CreateCodigoDTO codigoDTO) throws Exception;
+
+    /**
+     * Genera un nuevo código de verificación durante el proceso de Login (DobleAutenticación)
+     * @param codigoDTO datos del usuario destinatario
+     * @return mensaje con el resultado de la operación
+     * @throws Exception si ocurre un error durante la generacion.
+     */
+    String generate2FA(CreateCodigoDTO codigoDTO) throws Exception;
 
     /**
      * Confirma un codigo de verificacion emitido previamente.

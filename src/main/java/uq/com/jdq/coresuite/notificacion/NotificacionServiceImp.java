@@ -28,7 +28,7 @@ public class NotificacionServiceImp implements NotificacionService {
                 .from("jdqsolutionssas@gmail.com")
                 .to(emailDTO.destinatario())
                 .withSubject(emailDTO.asunto())
-                .withPlainText(emailDTO.cuerpo())
+                .withHTMLText(emailDTO.cuerpo())
                 .buildEmail();
 
         try (Mailer mailer = MailerBuilder

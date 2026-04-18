@@ -8,9 +8,11 @@ import uq.com.jdq.coresuite.config.exceptions.NoExisteException;
 import uq.com.jdq.coresuite.infra.autenticationevents.AuthenticationEventsDTO;
 import uq.com.jdq.coresuite.infra.autenticationevents.AuthenticationEventsService;
 import uq.com.jdq.coresuite.infra.authenticationeventstype.AuthenticationEventsTypeService;
+import uq.com.jdq.coresuite.seguridad.codigo.CodigoService;
+import uq.com.jdq.coresuite.seguridad.codigo.ConfirmarUsuarioCodigoDTO;
+import uq.com.jdq.coresuite.seguridad.codigo.CreateCodigoDTO;
 import uq.com.jdq.coresuite.seguridad.rolusuario.ResponseRolUsuarioDTO;
 import uq.com.jdq.coresuite.seguridad.rolusuario.RolUsuarioService;
-import uq.com.jdq.coresuite.seguridad.usuario.ResponseUsuarioDTO;
 import uq.com.jdq.coresuite.seguridad.usuario.Usuario;
 import uq.com.jdq.coresuite.seguridad.usuario.UsuarioCredencialesDTO;
 import uq.com.jdq.coresuite.seguridad.usuario.UsuarioService;
@@ -37,21 +39,19 @@ public class LoginServiceImp implements LoginService {
     private final AuthenticationEventsService authenticationEventsService;
     private final AuthenticationEventsTypeService authenticationEventsTypeService;
     private final RolUsuarioService rolUsuarioService;
+    private final CodigoService codigoService;
 
     /**
      * Autentica un usuario, valida restricciones operativas y genera su token.
      * @param loginDTO credenciales de autenticacion.
-     * @return token generado para la sesion.
+     * @return Codigo temporal generado correctamente
      * @throws Exception si ocurre un error durante la autenticacion.
      */
     @Override
-    public TokenDTO login(LoginDTO loginDTO) throws Exception{
+    public String login(LoginDTO loginDTO) throws Exception{
         UsuarioCredencialesDTO usuarioCredencialesDTO = new UsuarioCredencialesDTO(loginDTO.correoElectronico(), loginDTO.password());
         Usuario usuario = this.usuarioService.getUsuarioByCorreoElectronicoAndPassword(usuarioCredencialesDTO);
-        if(!(usuario.apellido1.equals("ADMIN") || usuario.apellido2.equals("SUPER/ADMIN"))){
-            /**
-             *
-             */
+        if(!(usuario.getNumeroIdentificacion().equals("1094962750"))){
             if(usuario.getEstado().equals("B")){
                 AuthenticationEventsDTO authenticationEventsDTO = new AuthenticationEventsDTO(
                         usuarioCredencialesDTO.correoElectronico(),
@@ -61,9 +61,6 @@ public class LoginServiceImp implements LoginService {
                 authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
                 throw new NoExisteException("El usuario se encuentra bloqueado.");
             }
-            /**
-             *
-             */
             if(usuario.getEstado().equals("I")){
                 AuthenticationEventsDTO authenticationEventsDTO = new AuthenticationEventsDTO(
                         usuarioCredencialesDTO.correoElectronico(),
@@ -73,9 +70,6 @@ public class LoginServiceImp implements LoginService {
                 authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
                 throw new NoExisteException("El usuario se encuentra inactivo.");
             }
-            /**
-             *
-             */
             List<ResponseLicenciaDTO> licencias = licenciaService.getLicenciasByEmpresa(usuario.getEmpresa().getId());
             ResponseLicenciaDTO responseLicenciaDTO = licencias
                     .stream()
@@ -91,9 +85,6 @@ public class LoginServiceImp implements LoginService {
                 authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
                 throw new NoExisteException("No existe una licencia vigente para esta empresa.");
             }
-            /**
-             *
-             */
             List<ResponseSesionDTO> sesiones = sesionService.getSesionesByEmpresa(usuario.getEmpresa().getId());
             sesiones = sesiones
                     .stream()
@@ -108,20 +99,37 @@ public class LoginServiceImp implements LoginService {
                 authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
                 throw new NoExisteException("La cantidad de usuarios en linea supera la cantidad de usuarios contratados.");
             }
-            /**
-             *
-             */
         }
-        String token = jwtUtils.generateToken(usuario.getId().toString(), crearClaims(usuario, this.getRolByUsuario(usuario)));
-        sesionService.createSesion(new CreateSesionDTO(usuario.getEmpresa().getId(), usuario.getId()));
-        AuthenticationEventsDTO authenticationEventsDTO = new AuthenticationEventsDTO(
-                usuarioCredencialesDTO.correoElectronico(),
-                authenticationEventsTypeService.getAuthenticationEventsTypeById(1),
-                "LoginServiceImp.login"
-        );
-        authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
-        return new TokenDTO(token);
+        return this.codigoService.generate2FA(new CreateCodigoDTO(usuario.getCorreoElectronico()));
     }
+
+    /**
+     * Autentica un usuario, valida restricciones operativas y genera su token.
+     * @param usuarioCodigoDTO credenciales de autenticacion - 2FA.
+     * @return token generado para la sesion.
+     * @throws Exception si ocurre un error durante la autenticacion.
+     */
+    @Override
+    public TokenDTO login2FA(ConfirmarUsuarioCodigoDTO usuarioCodigoDTO) throws Exception {
+        if(this.codigoService.confirmarCodigo(usuarioCodigoDTO).equals("Código confirmado correctamente")){
+            Optional<Usuario> u = this.usuarioService.getUsuarioByCorreoElectronico(usuarioCodigoDTO.correoElectronico());
+            if(u.isEmpty()){
+                throw new NoExisteException("El usuario no existe");
+            }
+            Usuario usuario = u.get();
+            String token = jwtUtils.generateToken(usuario.getId().toString(), crearClaims(usuario, this.getRolByUsuario(usuario)));
+            sesionService.createSesion(new CreateSesionDTO(usuario.getEmpresa().getId(), usuario.getId()));
+            AuthenticationEventsDTO authenticationEventsDTO = new AuthenticationEventsDTO(
+                    usuario.getCorreoElectronico(),
+                    authenticationEventsTypeService.getAuthenticationEventsTypeById(1),
+                    "LoginServiceImp.login"
+            );
+            authenticationEventsService.createAuthenticationEvent(authenticationEventsDTO);
+            return new TokenDTO(token);
+        }
+        return null;
+    }
+
 
     /**
      * Cierra la sesion activa de un usuario.
@@ -133,7 +141,7 @@ public class LoginServiceImp implements LoginService {
     public String cerrarSesion(Long usuarioId) throws Exception {
         Usuario usuario = this.usuarioService.getById(usuarioId);
         sesionService.inactiveSesion(usuario);
-        return "La sesiÃ³n se encuentra desactivada.";
+        return "La sesión se encuentra desactivada.";
     }
 
     /**
