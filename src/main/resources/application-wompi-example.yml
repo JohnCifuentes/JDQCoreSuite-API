@@ -1,0 +1,9 @@
+wompi:
+  public-key: ${WOMPI_PUBLIC_KEY:pub_test_xxx}
+  private-key: ${WOMPI_PRIVATE_KEY:prv_test_xxx}
+  integrity-secret: ${WOMPI_INTEGRITY_SECRET:test_integrity_xxx}
+  events-secret: ${WOMPI_EVENTS_SECRET:test_events_xxx}
+
+logging:
+  level:
+    uq.com.jdq.coresuite.payment: INFO

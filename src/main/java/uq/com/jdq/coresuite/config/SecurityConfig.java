@@ -53,6 +53,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/login/2FA").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/sistema/empresa").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/payments/create").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/payments/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/payments/*/sync").permitAll()
                 .requestMatchers("/api/catalogo/**").permitAll()
                 .requestMatchers("/api/seguridad/codigo/**").permitAll()
                 // Rutas pÃºblicas especÃ­ficas de usuario
