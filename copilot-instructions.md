@@ -431,3 +431,207 @@ Copilot debe priorizar siempre:
 5. documentar en español,
 6. evitar soluciones invasivas cuando una extensión pequeña del código actual sea suficiente.
 
+---
+
+## Módulo de pagos con Wompi
+
+### Resumen general
+
+El módulo implementa la integración entre JDQCoreSuite y **Wompi Checkout**. El backend **no procesa tarjetas directamente**: genera los datos necesarios para que el frontend Angular abra el widget de Wompi, persiste el estado del pago localmente y lo actualiza cuando Wompi notifica el resultado vía webhook.
+
+### Paquete del módulo
+
+```
+uq.com.jdq.coresuite.payment
+```
+
+### Archivos del módulo
+
+#### `PaymentStatus.java` — Enum de estados
+
+Estados del ciclo de vida de un pago:
+
+- `PENDING` — creado pero sin confirmación
+- `APPROVED` — pago aprobado por Wompi
+- `DECLINED` — rechazado, anulado o fallido
+- `ERROR` — estado desconocido
+
+Métodos importantes:
+- `fromWompiStatus(String)` — traduce el estado de texto de Wompi al enum interno (`VOIDED`, `FAILED`, `CREATED`, `PENDING_VALIDATION`, etc.)
+- `isTerminal()` — `true` si el estado ya no debe cambiar; usado para idempotencia en el webhook
+
+#### `Payment.java` — Entidad JPA
+
+Tabla: `sistema.payments`, secuencia: `sistema.payment_seq`.
+
+| Campo | Descripción |
+|---|---|
+| `id` | PK generada por secuencia |
+| `reference` | Referencia única del pago (UNIQUE, formato `PAY-{planId}-{UUID16}`) |
+| `amountInCents` | Valor del plan en centavos |
+| `currency` | Siempre `"COP"` |
+| `status` | Estado mapeado al enum `PaymentStatus` |
+| `planId` | FK lógica al plan pagado |
+| `wompiTransactionId` | ID de transacción devuelto por Wompi |
+| `statusMessage` | Texto descriptivo del estado |
+| `createdAt` / `updatedAt` | Generados automáticamente con `@PrePersist` / `@PreUpdate` |
+
+#### `PaymentRepository.java`
+
+Extiende `JpaRepository<Payment, Long>`. Métodos adicionales:
+- `findByReference(String)` — búsqueda por referencia única
+- `existsByReference(String)` — evita referencias duplicadas
+
+#### `CreatePaymentRequest.java`
+
+Record de entrada: `record CreatePaymentRequest(@NotNull Long planId)`
+
+#### `CreatePaymentResponse.java`
+
+**ATENCIÓN: este DTO se retorna DIRECTO desde el controller sin envolver en `RespuestaDTO`.**  
+Esta es la única excepción al patrón estándar del proyecto, necesaria porque Angular consume los 4 campos en la raíz del JSON para abrir el widget de Wompi.
+
+```java
+record CreatePaymentResponse(String reference, Long amountInCents, String currency, String signature)
+```
+
+#### `PaymentStatusResponse.java`
+
+DTO de consulta de estado: `reference`, `status`, `planId`, `amountInCents`, `currency`, `createdAt`, `updatedAt`.
+
+#### `WebhookProcessResponse.java`
+
+DTO de respuesta del webhook: `message`, `processed` (boolean), `reference`, `status`.
+
+#### `PaymentBusinessException.java`
+
+Excepción de negocio del módulo. Manejada en `CustomExceptionHandler` con HTTP 409 y `error: true`.
+
+---
+
+#### `WompiService.java` — Integración técnica con Wompi
+
+Se inyecta vía `@Value` desde variables de entorno:
+
+| Propiedad | Variable de entorno |
+|---|---|
+| `wompi.public-key` | `WOMPI_PUBLIC_KEY` |
+| `wompi.private-key` | `WOMPI_PRIVATE_KEY` |
+| `wompi.integrity-secret` | `WOMPI_INTEGRITY_SECRET` ← **obligatoria** |
+| `wompi.events-secret` | `WOMPI_EVENTS_SECRET` |
+
+**`generateIntegritySignature(reference, amountInCents, currency)`**
+
+Implementa la fórmula oficial de Wompi:
+```
+SHA256(reference + amountInCents + "COP" + integritySecret)
+```
+Aplica `.trim()` a todos los valores. Lanza `PaymentBusinessException` si el secreto no está configurado.
+
+**`isValidEventSignature(payload, signature)`**
+
+Soporta dos variantes de firma para compatibilidad:
+1. HMAC-SHA256 del payload con `eventsSecret`
+2. SHA256 de `payload + eventsSecret`
+
+**`validateEventSignature(payload, signature)`**
+
+Lanza `IllegalArgumentException` si la firma no es válida. Intenta extraer la firma del cuerpo JSON si no viene por header.
+
+**`queryTransactionByReference(reference)`**
+
+Consulta `https://production.wompi.co/v1/transactions?reference=...` con `RestClient` y `Authorization: Bearer {privateKey}`. Retorna `Optional<WompiTransactionResult>`. Si la llave privada no está configurada, retorna vacío con log de advertencia.
+
+---
+
+#### `PaymentService.java` / `PaymentServiceImpl.java` — Lógica de negocio
+
+**`createPayment`:**
+1. Valida `planId` no nulo
+2. Consulta el plan con `PlanService.getPlanById(planId)`
+3. Valida que el valor del plan sea mayor que cero
+4. Genera referencia única `PAY-{planId}-{UUID16}`, reintenta si ya existe
+5. Convierte a centavos: `valor * 100` con `RoundingMode.HALF_UP`
+6. Genera firma llamando a `WompiService.generateIntegritySignature()`
+7. Persiste `Payment` con estado `PENDING`
+8. Retorna `CreatePaymentResponse` con los 4 campos
+
+**`processWebhook`:**
+1. Valida la firma del evento
+2. Parsea el payload JSON con `ObjectMapper`
+3. Extrae `reference`, `status` y `wompiTransactionId` con rutas alternativas para compatibilidad con distintas estructuras de Wompi
+4. Si la referencia no existe localmente, retorna sin error
+5. Aplica idempotencia: ignora si mismo estado o estado terminal
+6. Actualiza estado, ID de transacción Wompi y mensaje descriptivo
+
+**`syncPaymentStatus`:**
+1. Busca el pago local
+2. Consulta directamente a Wompi con `queryTransactionByReference()`
+3. Si obtiene respuesta y el estado no es terminal, actualiza y persiste
+
+---
+
+#### `PaymentController.java` — Endpoints REST
+
+| Endpoint | Método | Auth | Descripción |
+|---|---|---|---|
+| `/api/payments/create` | POST | Público | Crea la transacción y retorna datos para el checkout |
+| `/api/payments/webhook` | POST | Público | Recibe y procesa eventos de Wompi |
+| `/api/payments/{reference}` | GET | Público | Consulta estado almacenado localmente |
+| `/api/payments/{reference}/sync` | GET | Público | Sincroniza consultando directamente a Wompi |
+
+**IMPORTANTE:** `POST /api/payments/create` retorna `ResponseEntity<CreatePaymentResponse>` **sin** `RespuestaDTO`. Los demás endpoints usan el patrón estándar `ResponseEntity<RespuestaDTO<T>>`.
+
+---
+
+### Migración de base de datos
+
+`V15__create_payments_table.sql` en el esquema `sistema`:
+
+- Crea secuencia `sistema.payment_seq`
+- Crea tabla `sistema.payments` con FK a `sistema.plan(id)`
+- Índices sobre `reference` (UNIQUE) y `status`
+- Constraint: `amount_in_cents > 0`, `currency DEFAULT 'COP'`
+
+---
+
+### Seguridad
+
+Las cuatro rutas de pagos están configuradas como **públicas** en `SecurityConfig.java`:
+
+```java
+.requestMatchers(HttpMethod.POST, "/api/payments/create").permitAll()
+.requestMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()
+.requestMatchers(HttpMethod.GET,  "/api/payments/*").permitAll()
+.requestMatchers(HttpMethod.GET,  "/api/payments/*/sync").permitAll()
+```
+
+---
+
+### Manejo de errores
+
+Todos los errores del módulo son manejados por `CustomExceptionHandler` con `error: true`:
+
+| Excepción | HTTP |
+|---|---|
+| `PaymentBusinessException` | 409 |
+| `NoExisteException` | 404 |
+| `IllegalArgumentException` | 400 |
+| `IllegalStateException` | 409 |
+| `Exception` genérico | 500 (mensaje genérico, no expone detalles internos) |
+
+---
+
+### Variable de entorno crítica
+
+Sin `WOMPI_INTEGRITY_SECRET` configurada en el entorno, el endpoint `POST /api/payments/create` devuelve HTTP 409. Esta es la variable mínima requerida para que el módulo funcione.
+
+---
+
+### Pruebas del módulo
+
+- `WompiServiceTest` — firma SHA-256 y validación de webhook
+- `PaymentServiceImplTest` — flujo de creación y consulta de estado con mocks
+- `PaymentControllerTest` — contrato HTTP exacto del endpoint de creación (MockMvc standalone)
+- `PaymentServiceWithRealWompiTest` — creación de pago con `WompiService` real
+

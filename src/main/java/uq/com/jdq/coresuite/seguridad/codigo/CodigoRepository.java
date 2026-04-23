@@ -11,9 +11,10 @@ public interface CodigoRepository extends JpaRepository<Codigo, Long> {
 
     /**
      * Obtiene el codigo mas reciente generado para un usuario.
-     * @param usuarioId identificador del usuario.
+     * @param id identificador del usuario.
+     * @param codigo codigo ingresado por el usuario
      * @return codigo encontrado, si existe.
      */
-    Optional<Codigo> findTopByUsuarioIdOrderByFechaGeneracionDesc(Long usuarioId);
+    Optional<Codigo> findByUsuarioIdAndCodigo(Long id, String codigo);
 
 }

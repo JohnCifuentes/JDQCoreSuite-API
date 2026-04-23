@@ -37,4 +37,13 @@ public interface PaymentService {
      * @throws Exception si la consulta no puede resolverse.
      */
     PaymentStatusResponse syncPaymentStatus(String reference) throws Exception;
+
+    /**
+     * Cancela un pago pendiente cuando el usuario cierra el widget sin completar el pago.
+     * @param reference referencia unica de la transaccion.
+     * @return estado actualizado del pago.
+     * @throws Exception si el pago no existe o ya se encuentra en estado terminal.
+     */
+    PaymentStatusResponse cancelPayment(String reference) throws Exception;
+
 }

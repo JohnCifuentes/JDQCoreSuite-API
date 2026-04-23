@@ -174,21 +174,20 @@ public class CodigoServiceImpl implements CodigoService {
     @Override
     public String confirmarCodigo(ConfirmarUsuarioCodigoDTO codigoDTO) throws Exception {
         Usuario usuario = getUsuarioByCorreoElectronico(codigoDTO.correoElectronico());
-        Optional<Codigo> codigo = codigoRepository.findTopByUsuarioIdOrderByFechaGeneracionDesc(usuario.getId());
-        if(codigo.isPresent()){
-            Codigo codigoAux = codigo.get();
-            if(codigoAux.getFechaGeneracion().plusMinutes(15).isBefore(LocalDateTime.now())){
-                throw new ReglasCodigoException("El código de confimación ha expirado. Solicite uno nuevamente");
-            }
-            if(!codigoAux.getEstado().equals("A")){
-                throw new ReglasCodigoException("El código de confirmación ya fue usado. Solicite uno nuevamente");
-            }
-            codigoAux.setEstado("I");
-            codigoRepository.save(codigoAux);
-            return "Código confirmado correctamente";
-        } else {
-            throw new NoExisteException("No se ha generado un código de confirmación para este usuario");
+        Optional<Codigo> codigoOpt = codigoRepository.findByUsuarioIdAndCodigo(usuario.getId(), codigoDTO.codigo());
+        if (codigoOpt.isEmpty()) {
+            throw new ReglasCodigoException("El código ingresado no es válido. Por favor verifique e intente nuevamente.");
         }
+        Codigo codigo = codigoOpt.get();
+        if (codigo.getFechaGeneracion().plusMinutes(15).isBefore(LocalDateTime.now())) {
+            throw new ReglasCodigoException("El código de confirmación ha expirado. Solicite uno nuevamente.");
+        }
+        if (!codigo.getEstado().equals("A")) {
+            throw new ReglasCodigoException("El código de confirmación ya fue utilizado. Solicite uno nuevamente.");
+        }
+        codigo.setEstado("I");
+        codigoRepository.save(codigo);
+        return "Código confirmado correctamente";
     }
 
     /**

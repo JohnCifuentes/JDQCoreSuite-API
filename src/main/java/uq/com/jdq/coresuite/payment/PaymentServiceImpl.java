@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uq.com.jdq.coresuite.config.exceptions.NoExisteException;
@@ -30,6 +31,9 @@ public class PaymentServiceImpl implements PaymentService {
     private final PlanService planService;
     private final WompiService wompiService;
 
+    @Value("${wompi.redirect-url:http://localhost:4200/payment-response}")
+    private String redirectUrlBase;
+
     /**
      * Crea el pago local y retorna la informacion necesaria para el checkout.
      * @param request plan a pagar.
@@ -49,24 +53,22 @@ public class PaymentServiceImpl implements PaymentService {
             throw new PaymentBusinessException("No fue posible iniciar el pago porque el valor del plan es invalido.");
         }
 
-        String reference = generateUniqueReference(plan.id());
+        String reference = generateUniqueReference();
         Long amountInCents = toAmountInCents(plan.valor());
-        String signature = wompiService.generateIntegritySignature(reference, amountInCents, DEFAULT_CURRENCY);
 
-        log.info("Datos de pago generados. reference={}, amountInCents={}, currency={}", reference, amountInCents, DEFAULT_CURRENCY);
-        log.debug("Firma Wompi generada correctamente para reference={}. signaturePrefix={}", reference, signature.substring(0, Math.min(12, signature.length())));
         Payment payment = new Payment();
         payment.setReference(reference);
         payment.setPlanId(plan.id());
         payment.setAmountInCents(amountInCents);
         payment.setCurrency(DEFAULT_CURRENCY);
         payment.setStatus(PaymentStatus.PENDING);
-        payment.setStatusMessage("Transaccion creada y pendiente de confirmacion por Wompi Checkout.");
-
+        payment.setStatusMessage("Transaccion pendiente de confirmacion por Wompi Widget.");
         paymentRepository.save(payment);
-        log.info("Pago creado correctamente. reference={}, planId={}, amountInCents={}, status={}", reference, plan.id(), amountInCents, PaymentStatus.PENDING);
 
-        return new CreatePaymentResponse(reference, amountInCents, DEFAULT_CURRENCY, signature);
+        String integritySignature = wompiService.generateIntegritySignature(reference, amountInCents, DEFAULT_CURRENCY);
+        log.info("Pago creado para widget. reference={}, planId={}, amountInCents={}", reference, plan.id(), amountInCents);
+
+        return new CreatePaymentResponse(reference, amountInCents, DEFAULT_CURRENCY, wompiService.getPublicKey(), integritySignature, redirectUrlBase);
     }
 
     /**
@@ -171,6 +173,31 @@ public class PaymentServiceImpl implements PaymentService {
         return mapToStatusResponse(payment);
     }
 
+    /**
+     * Cancela un pago pendiente cuando el usuario cierra el widget sin completar la transaccion.
+     * @param reference referencia unica del pago.
+     * @return estado actualizado del pago.
+     * @throws Exception si el pago no existe o ya se encuentra en estado terminal.
+     */
+    @Override
+    @Transactional
+    public PaymentStatusResponse cancelPayment(String reference) throws Exception {
+        Payment payment = paymentRepository.findByReference(reference)
+                .orElseThrow(() -> new NoExisteException("No existe un pago con la referencia indicada."));
+
+        if (payment.getStatus() != null && payment.getStatus().isTerminal()) {
+            throw new PaymentBusinessException(
+                    "No es posible cancelar el pago porque ya se encuentra en estado " + payment.getStatus() + ".");
+        }
+
+        payment.setStatus(PaymentStatus.CANCELLED);
+        payment.setStatusMessage("Pago cancelado por el usuario al cerrar el widget sin completar la transaccion.");
+        paymentRepository.save(payment);
+
+        log.info("Pago cancelado por el usuario. reference={}", reference);
+        return mapToStatusResponse(payment);
+    }
+
     private PaymentStatusResponse mapToStatusResponse(Payment payment) {
         return new PaymentStatusResponse(
                 payment.getReference(),
@@ -189,10 +216,10 @@ public class PaymentServiceImpl implements PaymentService {
                 .longValueExact();
     }
 
-    private String generateUniqueReference(Long planId) {
+    private String generateUniqueReference() {
         String reference;
         do {
-            reference = "PAY-" + planId + "-" + UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase();
+            reference = UUID.randomUUID().toString().replace("-", "");
         } while (paymentRepository.existsByReference(reference));
         return reference;
     }

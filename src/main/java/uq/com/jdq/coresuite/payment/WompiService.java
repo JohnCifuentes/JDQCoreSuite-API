@@ -15,6 +15,8 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -32,12 +34,14 @@ public class WompiService {
     private final String eventsSecret;
     private final ObjectMapper objectMapper;
     private final RestClient restClient;
+    private final RestClient transactionRestClient;
 
     public WompiService(
             @Value("${wompi.public-key:}") String publicKey,
             @Value("${wompi.private-key:}") String privateKey,
             @Value("${wompi.integrity-secret:}") String integritySecret,
-            @Value("${wompi.events-secret:}") String eventsSecret
+            @Value("${wompi.events-secret:}") String eventsSecret,
+            @Value("${wompi.api-base-url:https://sandbox.wompi.co/v1}") String apiBaseUrl
     ) {
         this.publicKey = publicKey;
         this.privateKey = privateKey;
@@ -47,6 +51,17 @@ public class WompiService {
         this.restClient = RestClient.builder()
                 .baseUrl("https://production.wompi.co/v1")
                 .build();
+        this.transactionRestClient = RestClient.builder()
+                .baseUrl(apiBaseUrl)
+                .build();
+    }
+
+    /**
+     * Retorna la llave publica del comercio configurada para el widget.
+     * @return llave publica de Wompi.
+     */
+    public String getPublicKey() {
+        return publicKey;
     }
 
     /**
@@ -70,8 +85,14 @@ public class WompiService {
             throw new PaymentBusinessException("No fue posible iniciar el pago por una configuracion incompleta del sistema.");
         }
         String safeCurrency = (currency == null || currency.isBlank()) ? DEFAULT_CURRENCY : currency.trim();
-        log.info("Generando firma de integridad Wompi. reference={}, amountInCents={}, currency={}, integritySecretConfigured={}", reference, amountInCents, safeCurrency, true);
-        return sha256Hex(reference.trim() + amountInCents + safeCurrency + cleanIntegritySecret);
+        log.debug("Integrity secret length: {}", cleanIntegritySecret.length());
+        if (publicKey != null && publicKey.startsWith("pub_test_") && !cleanIntegritySecret.startsWith("test_")) {
+            log.warn("ATENCION: posible mezcla de ambientes. publicKey es de prueba (pub_test_) pero integritySecret no comienza con 'test_'. Verificar configuracion.");
+        }
+        log.info("Generando firma de integridad Wompi. reference={}, amountInCents={}, currency={}, integritySecretConfigured=true", reference, amountInCents, safeCurrency);
+        String signature = sha256Hex(reference.trim() + amountInCents + safeCurrency + cleanIntegritySecret);
+        log.info("Wompi debug -> reference: {}, amount: {}, currency: {}, signature: {}", reference, amountInCents, safeCurrency, signature);
+        return signature;
     }
 
     /**
@@ -119,6 +140,57 @@ public class WompiService {
 
         if (!isValidEventSignature(payload, signatureToValidate)) {
             throw new IllegalArgumentException("La firma del webhook de Wompi no es valida.");
+        }
+    }
+
+    /**
+     * Crea una transaccion directamente en la API de Wompi.
+     * @param reference referencia unica del pago.
+     * @param amountInCents valor del pago en centavos.
+     * @param currency moneda de la transaccion.
+     * @return respuesta de Wompi con id y estado inicial de la transaccion.
+     * @throws PaymentBusinessException si la llave privada no esta configurada o Wompi retorna error.
+     */
+    public WompiTransactionResponse createTransaction(String reference, Long amountInCents, String currency) {
+        if (privateKey == null || privateKey.isBlank()) {
+            throw new PaymentBusinessException("No fue posible crear la transaccion porque WOMPI_PRIVATE_KEY no esta configurada.");
+        }
+        String safeCurrency = (currency == null || currency.isBlank()) ? DEFAULT_CURRENCY : currency.trim();
+        log.info("Creando transaccion en Wompi. reference={}, amountInCents={}, currency={}", reference, amountInCents, safeCurrency);
+
+        try {
+            Map<String, Object> requestBody = new LinkedHashMap<>();
+            requestBody.put("amount_in_cents", amountInCents);
+            requestBody.put("currency", safeCurrency);
+            requestBody.put("reference", reference);
+            requestBody.put("customer_email", "test@test.com");
+
+            String body = objectMapper.writeValueAsString(requestBody);
+            log.debug("Request body enviado a Wompi: {}", body);
+
+            JsonNode response = transactionRestClient.post()
+                    .uri("/transactions")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + privateKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .body(JsonNode.class);
+
+            if (response == null) {
+                throw new PaymentBusinessException("Wompi no retorno respuesta al crear la transaccion.");
+            }
+
+            JsonNode data = response.path("data");
+            String transactionId = textOf(data, "id");
+            String status = textOf(data, "status");
+
+            log.info("Transaccion creada en Wompi. reference={}, transactionId={}, status={}", reference, transactionId, status);
+            return new WompiTransactionResponse(transactionId, status);
+        } catch (PaymentBusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error al crear transaccion en Wompi. reference={}", reference, e);
+            throw new PaymentBusinessException("No fue posible conectar con Wompi para crear la transaccion. Intente mas tarde.");
         }
     }
 
@@ -186,6 +258,14 @@ public class WompiService {
      * @param reference referencia local.
      */
     public record WompiTransactionResult(String transactionId, PaymentStatus status, String reference) {
+    }
+
+    /**
+     * Respuesta de la API de Wompi al crear una transaccion.
+     * @param id identificador de transaccion asignado por Wompi.
+     * @param status estado inicial de la transaccion.
+     */
+    public record WompiTransactionResponse(String id, String status) {
     }
 
     private Optional<String> extractSignatureFromPayload(String payload) {

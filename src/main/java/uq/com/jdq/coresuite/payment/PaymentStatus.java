@@ -9,7 +9,8 @@ public enum PaymentStatus {
     PENDING,
     APPROVED,
     DECLINED,
-    ERROR;
+    ERROR,
+    CANCELLED;
 
     /**
      * Convierte el estado recibido desde Wompi al enum interno del sistema.
@@ -34,6 +35,6 @@ public enum PaymentStatus {
      * @return true si el estado no deberia cambiar por eventos repetidos.
      */
     public boolean isTerminal() {
-        return this == APPROVED || this == DECLINED || this == ERROR;
+        return this == APPROVED || this == DECLINED || this == ERROR || this == CANCELLED;
     }
 }

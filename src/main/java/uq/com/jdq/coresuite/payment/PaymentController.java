@@ -28,7 +28,7 @@ public class PaymentController {
      * @throws Exception si ocurre un error de negocio.
      */
     @PostMapping("/create")
-    @Operation(summary = "Crear pago Wompi", description = "Genera la referencia local, la firma de integridad y deja el pago en estado PENDING")
+    @Operation(summary = "Crear pago Wompi", description = "Genera la referencia local, crea la transaccion en Wompi y retorna el transactionId")
     public ResponseEntity<CreatePaymentResponse> createPayment(@Valid @RequestBody CreatePaymentRequest request) throws Exception {
         long start = System.nanoTime();
         log.info("Solicitud de creacion de pago recibida. planId={}", request != null ? request.planId() : null);
@@ -79,5 +79,18 @@ public class PaymentController {
     @Operation(summary = "Sincronizar pago", description = "Consulta directamente a Wompi con la llave privada para actualizar el estado local")
     public ResponseEntity<RespuestaDTO<PaymentStatusResponse>> syncPaymentStatus(@PathVariable String reference) throws Exception {
         return ResponseEntity.ok(new RespuestaDTO<>(false, paymentService.syncPaymentStatus(reference)));
+    }
+
+    /**
+     * Cancela un pago pendiente cuando el usuario cierra el widget sin completar la transaccion.
+     * @param reference referencia unica del pago.
+     * @return estado actualizado del pago.
+     * @throws Exception si el pago no existe o ya esta en estado terminal.
+     */
+    @PostMapping("/{reference}/cancel")
+    @Operation(summary = "Cancelar pago", description = "Marca como CANCELLED un pago pendiente cuando el usuario cierra el widget sin pagar")
+    public ResponseEntity<RespuestaDTO<PaymentStatusResponse>> cancelPayment(@PathVariable String reference) throws Exception {
+        log.info("Solicitud de cancelacion de pago recibida. reference={}", reference);
+        return ResponseEntity.ok(new RespuestaDTO<>(false, paymentService.cancelPayment(reference)));
     }
 }
